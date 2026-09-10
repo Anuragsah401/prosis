@@ -1,3 +1,6 @@
+process.env.NODE_ENV = "test";
+process.env.PROSIS_TEST_MODE = "true";
+
 const path = require("path");
 const jiti = require("jiti")(path.join(process.cwd(), "index.js"), {
   alias: {

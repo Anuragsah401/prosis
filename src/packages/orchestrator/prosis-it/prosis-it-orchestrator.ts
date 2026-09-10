@@ -114,7 +114,7 @@ export class ProsisItOrchestrator {
       });
     }
 
-    const previousResults: Record<string, any> = { ...context.previousToolResults };
+    const previousResults: Record<string, any> = {};
     const planId = `plan_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const steps: PlanStep[] = [];
     let loopCount = 0;
@@ -283,7 +283,7 @@ export class ProsisItOrchestrator {
 
         return {
           state: "COMPLETED",
-          plan,
+          plan: steps.length > 0 ? plan : undefined,
           response: finalMsg,
           toolResults: previousResults,
           reasoningSummary: aiDecision.reasoningSummary,
