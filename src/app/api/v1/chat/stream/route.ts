@@ -8,7 +8,13 @@ const chatOrchestrator = new ProsisItOrchestrator();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { message, source = "web", sessionId = "sess_chat_default", conversationId = "conv_chat_default" } = body;
+    const {
+      message,
+      source = "web",
+      sessionId = "sess_chat_default",
+      conversationId = "conv_chat_default",
+      conversationHistory = [],
+    } = body;
 
     if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json(
@@ -43,7 +49,13 @@ export async function POST(req: NextRequest) {
       previousToolResults: {},
       pendingApprovals: [],
       autonomyLevel: 1,
-      conversationHistory: [],
+      conversationHistory: Array.isArray(conversationHistory)
+        ? conversationHistory.map((h: any) => ({
+            role: h.role === "assistant" || h.role === "prosis" ? "assistant" : "user",
+            content: String(h.content || ""),
+            timestamp: h.timestamp || new Date().toISOString(),
+          }))
+        : [],
     };
 
     const output = await chatOrchestrator.orchestrate(message.trim(), context);

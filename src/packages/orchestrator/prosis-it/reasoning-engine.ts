@@ -123,47 +123,70 @@ export class GeminiReasoningProvider implements IProsisReasoningEngine {
   private apiKey: string;
   private model: string;
 
-  constructor(apiKey: string, model = "gemini-flash-latest") {
+  constructor(apiKey: string, model = "gemini-flash-lite-latest") {
     this.apiKey = apiKey;
     this.model = model;
   }
 
   public async reason(request: ProsisAIRequest): Promise<ProsisAIResponse> {
     const payload = buildPromptPayload(request);
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+    const candidateModels = Array.from(
+      new Set([
+        this.model,
+        "gemini-flash-lite-latest",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-flash-latest",
+      ])
+    );
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: PROSIS_SYSTEM_PROMPT }],
-        },
-        contents: [
-          {
-            parts: [{ text: `Analyze this user message and return the structured JSON decision:\n${payload}` }],
-          },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      }),
-    });
+    let lastError: Error | null = null;
 
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Gemini reasoning call failed (${res.status}): ${errText}`);
+    for (const model of candidateModels) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: PROSIS_SYSTEM_PROMPT }],
+            },
+            contents: [
+              {
+                parts: [{ text: `Analyze this user message and return the structured JSON decision:\n${payload}` }],
+              },
+            ],
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.2,
+            },
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.warn(`[GeminiReasoningProvider] Model ${model} returned ${res.status}: ${errText.slice(0, 150)}`);
+          lastError = new Error(`Gemini (${model}) failed (${res.status}): ${errText}`);
+          continue;
+        }
+
+        const data = await res.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) {
+          lastError = new Error(`Gemini (${model}) returned empty response content.`);
+          continue;
+        }
+
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
+        return ProsisAIResponseSchema.parse(parsed);
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[GeminiReasoningProvider] Error with model ${model}:`, err.message);
+      }
     }
 
-    const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      throw new Error("Gemini returned empty response content.");
-    }
-
-    const parsed = JSON.parse(rawText);
-    return ProsisAIResponseSchema.parse(parsed);
+    throw lastError || new Error("Gemini reasoning failed across all candidate models.");
   }
 }
 
@@ -722,7 +745,7 @@ export class ProsisReasoningEngine {
     if (preferredProvider === "gemini" && process.env.GEMINI_API_KEY) {
       this.defaultEngine = new GeminiReasoningProvider(
         process.env.GEMINI_API_KEY,
-        process.env.GEMINI_REASONING_MODEL || "gemini-flash-latest"
+        process.env.GEMINI_REASONING_MODEL || "gemini-flash-lite-latest"
       );
       return this.defaultEngine;
     }
@@ -739,7 +762,7 @@ export class ProsisReasoningEngine {
     if (process.env.GEMINI_API_KEY) {
       this.defaultEngine = new GeminiReasoningProvider(
         process.env.GEMINI_API_KEY,
-        process.env.GEMINI_REASONING_MODEL || "gemini-flash-latest"
+        process.env.GEMINI_REASONING_MODEL || "gemini-flash-lite-latest"
       );
       return this.defaultEngine;
     }

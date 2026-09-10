@@ -71,10 +71,22 @@ export function useProsisSession(options?: ProsisSessionOptions) {
       });
 
       try {
+        const priorHistory = turnsRef.current
+          .slice(0, -1) // Exclude current optimistic turn
+          .map((t) => ({
+            role: t.role === "prosis" ? "assistant" : "user",
+            content: t.content,
+            timestamp: t.timestamp,
+          }));
+
         const res = await fetch("/api/v1/chat/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, source }),
+          body: JSON.stringify({
+            message: text,
+            source,
+            conversationHistory: priorHistory,
+          }),
         });
 
         const json = await res.json();
@@ -82,7 +94,6 @@ export function useProsisSession(options?: ProsisSessionOptions) {
           const {
             replyText,
             spokenText,
-            turns: updatedTurns,
             pendingApproval,
             workspaceAction,
           } = json.data;
@@ -91,9 +102,18 @@ export function useProsisSession(options?: ProsisSessionOptions) {
             options.onWorkspaceAction(workspaceAction);
           }
 
-          if (updatedTurns) {
-            setTurns(updatedTurns);
-            turnsRef.current = updatedTurns;
+          if (replyText) {
+            const assistantTurn: MessageTurn = {
+              id: `msg_${Date.now()}_a`,
+              role: "prosis",
+              content: replyText,
+              timestamp: new Date().toISOString(),
+            };
+            setTurns((prev) => {
+              const next = [...prev, assistantTurn];
+              turnsRef.current = next;
+              return next;
+            });
           }
 
           // Vocalize response if voice is active or user spoke via voice in local engine

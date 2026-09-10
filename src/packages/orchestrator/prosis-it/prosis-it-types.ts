@@ -209,13 +209,13 @@ export interface ProsisAIResponse {
   goal: string;
   reasoningSummary: string; // Concise user-safe explanation, NOT hidden chain-of-thought
   nextAction: ProsisAINextAction;
-  selectedCapability?: string;
-  selectedTool?: string;
-  toolArguments?: Record<string, any>;
-  requiresApproval?: boolean;
-  needsMoreInformation?: boolean;
-  clarificationPrompt?: string;
-  finalResponse?: string;
+  selectedCapability?: string | null;
+  selectedTool?: string | null;
+  toolArguments?: Record<string, any> | null;
+  requiresApproval?: boolean | null;
+  needsMoreInformation?: boolean | null;
+  clarificationPrompt?: string | null;
+  finalResponse?: string | null;
 }
 
 export const ProsisAIResponseSchema = z.object({
@@ -228,18 +228,18 @@ export const ProsisAIResponseSchema = z.object({
       "multi_step_task",
       "destructive_action",
     ]),
-    targetCapabilities: z.array(z.string()),
-    isDestructive: z.boolean(),
-    confidence: z.number().min(0).max(1),
+    targetCapabilities: z.array(z.string()).default([]),
+    isDestructive: z.boolean().default(false),
+    confidence: z.number().min(0).max(1).default(0.9),
   }),
   goal: z.string(),
   reasoningSummary: z.string(),
   nextAction: z.enum(["tool_request", "clarification", "response", "approval_required"]),
-  selectedCapability: z.string().optional(),
-  selectedTool: z.string().optional(),
-  toolArguments: z.record(z.string(), z.any()).optional(),
-  requiresApproval: z.boolean().optional(),
-  needsMoreInformation: z.boolean().optional(),
-  clarificationPrompt: z.string().optional(),
-  finalResponse: z.string().optional(),
+  selectedCapability: z.string().nullable().optional(),
+  selectedTool: z.string().nullable().optional(),
+  toolArguments: z.record(z.string(), z.any()).nullable().optional(),
+  requiresApproval: z.boolean().nullable().optional(),
+  needsMoreInformation: z.boolean().nullable().optional(),
+  clarificationPrompt: z.string().nullable().optional(),
+  finalResponse: z.string().nullable().optional(),
 });

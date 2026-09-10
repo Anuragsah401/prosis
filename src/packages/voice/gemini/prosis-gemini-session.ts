@@ -49,6 +49,7 @@ export class ProsisGeminiLiveSession {
   private config: GeminiSessionConfig | null = null;
   private setupComplete = false;
   private resolveConnect: ((val: any) => void) | null = null;
+  private currentTurnTranscript = "";
 
   // Pending input audio buffer (accumulated PCM samples)
   private pendingAudioChunks: Int16Array[] = [];
@@ -303,7 +304,8 @@ export class ProsisGeminiLiveSession {
             this.enqueueAudioChunk(part.inlineData.data);
           }
           // Text response
-          if (part.text) {
+          if (part.text && !part.thought && !part.text.startsWith("**Crafting")) {
+            this.currentTurnTranscript += part.text;
             this.events.onTranscript(part.text, false, "prosis");
           }
         }
@@ -311,6 +313,10 @@ export class ProsisGeminiLiveSession {
 
       // Turn complete
       if (sc.turnComplete) {
+        if (this.currentTurnTranscript.trim()) {
+          this.events.onTranscript(this.currentTurnTranscript.trim(), true, "prosis");
+          this.currentTurnTranscript = "";
+        }
         // Emit final transcript if there was text
         if (this.state === "speaking") {
           // Audio will finish playing via the queue
