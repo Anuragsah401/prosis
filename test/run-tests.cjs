@@ -28,6 +28,11 @@ async function runAllTests() {
   if (typeof runPhase3Validation === "function") {
     await runPhase3Validation();
   }
+
+  const { runProsisItValidation } = jiti("./test/prosis-it-validation.ts");
+  if (typeof runProsisItValidation === "function") {
+    await runProsisItValidation();
+  }
 }
 
 runAllTests().catch((err) => {

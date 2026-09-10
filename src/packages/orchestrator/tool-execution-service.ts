@@ -75,6 +75,28 @@ export class ToolExecutionService {
   }
 
   /**
+   * Authorizes a tool for execution through the production gateway.
+   */
+  public static allowTool(toolName: string): void {
+    REALTIME_TOOL_ALLOWLIST.add(toolName);
+  }
+
+  /**
+   * Revokes authorization for a tool from the gateway allowlist.
+   */
+  public static disallowTool(toolName: string): void {
+    REALTIME_TOOL_ALLOWLIST.delete(toolName);
+  }
+
+  /**
+   * Checks if a tool is currently allowlisted on the gateway.
+   */
+  public static isToolAllowed(toolName: string): boolean {
+    const canonicalName = normalizeToolName(toolName);
+    return REALTIME_TOOL_ALLOWLIST.has(toolName) || REALTIME_TOOL_ALLOWLIST.has(canonicalName);
+  }
+
+  /**
    * Executes a tool strictly through the server-side authorization and tenant boundary.
    * Supports both explicit TrustedExecutionContext or backward-compatible request.session.
    */
