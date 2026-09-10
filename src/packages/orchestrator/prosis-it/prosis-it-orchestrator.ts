@@ -1,32 +1,54 @@
 /**
  * @prosis/orchestrator - ProsisIt AI Orchestrator
- * Central intelligence and orchestration engine for the Prosis ecosystem.
- * Implements the cognitive loop:
- * User -> Understand Intent -> Reason / Plan -> Select Capability -> Secure Tool Gateway -> Observe -> Synthesize
+ * Central intelligence and orchestration coordinator for the Prosis enterprise ecosystem.
+ * Implements the real cognitive loop:
+ * User Directive -> Model Reasoning -> Dynamic Plan/Tool Selection -> Server Tool Gateway -> Telemetry Reflection -> Model Final Synthesis
  */
 
 import {
   ProsisOrchestrationState,
-  RequestClassification,
   ProsisContext,
   ProsisPlan,
   PlanStep,
   PendingApproval,
-  IntentUnderstanding,
   OrchestrationResult,
-  CapabilityDefinition,
+  ProsisAIRequest,
+  ProsisAIResponse,
+  ProsisAIToolDescriptor,
+  ConversationTurn,
 } from "./prosis-it-types";
 import { CapabilityRegistry } from "./capability-registry";
+import { IProsisReasoningEngine, ProsisReasoningEngine } from "./reasoning-engine";
 import { ToolExecutionService } from "../tool-execution-service";
-import { AuthService } from "../auth-service";
+import { ToolRegistry } from "../../tools";
 import { TrustedExecutionContext } from "../tool-gateway-types";
 
 export class ProsisItOrchestrator {
+  private reasoningEngine: IProsisReasoningEngine;
   private activePlans: Map<string, ProsisPlan> = new Map();
   private pendingApprovals: Map<string, PendingApproval> = new Map();
+  public static readonly MAX_ORCHESTRATION_STEPS = 5;
+
+  constructor(reasoningEngine?: IProsisReasoningEngine) {
+    this.reasoningEngine = reasoningEngine || ProsisReasoningEngine.getEngine();
+  }
 
   /**
-   * Main entry point: Processes a user input through the cognitive loop.
+   * Sets or updates the active reasoning engine implementation (e.g. for testing or provider switching).
+   */
+  public setReasoningEngine(engine: IProsisReasoningEngine): void {
+    this.reasoningEngine = engine;
+  }
+
+  /**
+   * Retrieves the current active reasoning engine.
+   */
+  public getReasoningEngine(): IProsisReasoningEngine {
+    return this.reasoningEngine;
+  }
+
+  /**
+   * Main entry point: Executes the real LLM cognitive loop with deterministic server boundaries.
    */
   public async orchestrate(
     input: string,
@@ -40,7 +62,7 @@ export class ProsisItOrchestrator {
       };
     }
 
-    // Check interruption status upfront
+    // 1. Check interruption status upfront
     if (context.interruptionEpoch !== undefined) {
       const activeEpoch = ToolExecutionService.getSessionEpoch(context.sessionId);
       if (context.interruptionEpoch < activeEpoch) {
@@ -52,304 +74,17 @@ export class ProsisItOrchestrator {
       }
     }
 
-    // 1. UNDERSTANDING: Intent comprehension & reasoning
-    const understanding = this.understand(trimmedInput, context);
-
-    // 2. Pure Conversation & System Identity
-    if (understanding.classification === "conversation") {
-      const response = this.handleConversation(understanding, trimmedInput);
-      return {
-        state: "COMPLETED",
-        response,
-      };
+    // Initialize conversation history if needed
+    if (!context.conversationHistory) {
+      context.conversationHistory = [];
     }
+    context.conversationHistory.push({
+      role: "user",
+      content: trimmedInput,
+      timestamp: new Date().toISOString(),
+    });
 
-    // 3. Roadmap / Future Capability Request
-    const futureCaps = understanding.targetCapabilities
-      .map((id) => CapabilityRegistry.get(id))
-      .filter((c): c is CapabilityDefinition => c !== undefined && c.status === "future");
-
-    if (futureCaps.length > 0 && understanding.targetCapabilities.length === futureCaps.length) {
-      const futureCap = futureCaps[0];
-      const response = `${futureCap.name} is part of the Prosis ecosystem roadmap. Supported operations will include ${futureCap.supportedOperations.slice(0, 3).join(", ")}. ${futureCap.futureRoadmapNotes || "Live execution for this module will be available in an upcoming release."}`;
-      return {
-        state: "COMPLETED",
-        response,
-      };
-    }
-
-    // 4. Missing required parameters
-    if (understanding.requiresClarification) {
-      return {
-        state: "WAITING_FOR_INFORMATION",
-        response: understanding.clarificationPrompt || "Additional parameters required to execute this operation.",
-        requiresClarification: true,
-        missingParameters: understanding.missingParameters,
-      };
-    }
-
-    // 5. PLANNING: Construct execution plan
-    const plan = this.plan(understanding, context);
-    this.activePlans.set(plan.id, plan);
-
-    // 6. EXECUTION & OBSERVATION LOOP
-    return await this.executePlan(plan, context);
-  }
-
-  /**
-   * Cognitive Stage 1: Understand Intent & Semantic Analysis.
-   * Evaluates user prompt, context, role, active venue, and capabilities.
-   */
-  public understand(input: string, context: ProsisContext): IntentUnderstanding {
-    const lower = input.toLowerCase();
-
-    // 1. System inquiry / greetings
-    const isGreeting = /^(hello|hi|hey|good\s(morning|afternoon|evening)|prosis)\b/i.test(lower);
-    const isIdentityInquiry =
-      /who are you|what are you|what can you do|capabilities|tell me about prosisit|ecosystem overview/i.test(lower);
-
-    if (isGreeting && !/analytics|booking|reservation|staff|menu|marketing|revenue|pacing/i.test(lower)) {
-      return {
-        intent: "greeting",
-        classification: "conversation",
-        targetCapabilities: [],
-        entities: {},
-        requiresClarification: false,
-        isDestructive: false,
-        confidence: 0.95,
-      };
-    }
-
-    if (isIdentityInquiry) {
-      return {
-        intent: "ecosystem_inquiry",
-        classification: "conversation",
-        targetCapabilities: CapabilityRegistry.getAll().map((c) => c.id),
-        entities: {},
-        requiresClarification: false,
-        isDestructive: false,
-        confidence: 0.98,
-      };
-    }
-
-    // 2. Destructive Actions Detection
-    const isDestructive =
-      /cancel|delete|purge|remove all|void|shutdown|emergency close|clear/i.test(lower);
-
-    // 3. Multi-domain / Multi-step Detection
-    const mentionsAnalytics = /analytic|metric|pacing|cover|revenue|trend|occupancy|performance/i.test(lower);
-    const mentionsBooking = /book|reservation|table|guest|party|seating|waitlist/i.test(lower);
-    const mentionsWorkforce = /staff|schedule|shift|roster|labor|clock/i.test(lower);
-    const mentionsMenu = /menu|dish|item|86|price|kitchen|recipe/i.test(lower);
-    const mentionsMarketing = /campaign|promo|vip|discount|marketing|outreach/i.test(lower);
-
-    const isAnalyticsQuery = mentionsAnalytics && !/create|make|reserve\b|book a table|assign shift/i.test(lower);
-
-    const targetCapabilities: string[] = [];
-    if (mentionsWorkforce) targetCapabilities.push("workforce");
-    if (mentionsMenu) targetCapabilities.push("menu");
-    if (mentionsMarketing) targetCapabilities.push("marketing");
-
-    if (isAnalyticsQuery) {
-      targetCapabilities.unshift("analytics");
-    } else if (mentionsBooking) {
-      targetCapabilities.push("seatbooking");
-    }
-
-    // Has multiple distinct domains joined by coordinating words
-    const hasMultipleDomains = targetCapabilities.length > 1 && /(and|then|after|also|with)/i.test(lower);
-
-    if (!hasMultipleDomains && isAnalyticsQuery) {
-      targetCapabilities.length = 0;
-      targetCapabilities.push("analytics");
-    }
-
-    // Fallback to active product if none detected
-    if (targetCapabilities.length === 0 && context.activeProduct) {
-      targetCapabilities.push(context.activeProduct);
-    }
-
-    const isBookingCreation = /\b(create|make|book)\s+(a\s+)?(reservation|table|seat)\b|\breserve\s+(a\s+)?(table|seat)?\b|\bbook\s+for\b/i.test(lower);
-
-    let classification: RequestClassification = "information_request";
-    if (isDestructive) {
-      classification = "destructive_action";
-    } else if (hasMultipleDomains) {
-      classification = "multi_step_task";
-    } else if (!isAnalyticsQuery && isBookingCreation) {
-      classification = "business_operation";
-    } else {
-      classification = "information_request";
-    }
-
-    // Extract basic entities from context or utterance
-    const entities: Record<string, any> = {};
-    if (/cantina/i.test(lower)) entities.venueId = "cantina_bella";
-    else if (/rooftop/i.test(lower)) entities.venueId = "rooftop_lounge";
-    else if (/all\s*(venues)?|portfolio|across/i.test(lower)) entities.venueId = "all";
-    else if (context.activeVenue) entities.venueId = context.activeVenue;
-
-    if (/last week/i.test(lower)) entities.timeframe = "last_week";
-    else if (/month/i.test(lower)) entities.timeframe = "month";
-    else entities.timeframe = "current_week";
-
-    // Party size extraction
-    const partyMatch = lower.match(/party of (\d+)|(\d+)\s*(people|guests|covers)/i);
-    if (partyMatch) {
-      entities.partySize = parseInt(partyMatch[1] || partyMatch[2], 10);
-    }
-
-    // Check if critical booking parameters are missing when attempting a direct booking
-    let requiresClarification = false;
-    const missingParameters: string[] = [];
-    if (classification === "business_operation" && isBookingCreation && !isDestructive) {
-      if (!entities.partySize) {
-        requiresClarification = true;
-        missingParameters.push("partySize");
-      }
-    }
-
-    return {
-      intent: lower,
-      classification,
-      targetCapabilities,
-      entities,
-      requiresClarification,
-      missingParameters: missingParameters.length > 0 ? missingParameters : undefined,
-      clarificationPrompt: requiresClarification
-        ? `Please specify party size and preferred dining time to confirm this reservation.`
-        : undefined,
-      isDestructive,
-      confidence: 0.9,
-    };
-  }
-
-  /**
-   * Cognitive Stage 2: Construct Execution Plan.
-   */
-  public plan(understanding: IntentUnderstanding, context: ProsisContext): ProsisPlan {
-    const planId = `plan_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const steps: PlanStep[] = [];
-
-    // Step generation based on understanding
-    if (understanding.classification === "destructive_action") {
-      // Destructive operation requires supervised approval at Autonomy Level 1
-      const isBookingCancel = understanding.targetCapabilities.includes("seatbooking");
-      steps.push({
-        id: `step_${planId}_1`,
-        goal: isBookingCancel ? "Cancel designated dining reservations" : "Execute destructive operational modification",
-        capabilityId: isBookingCancel ? "seatbooking" : understanding.targetCapabilities[0] || "operations",
-        toolName: isBookingCancel ? "seatbooking_createReservation" : "emergency_action",
-        arguments: {
-          ...understanding.entities,
-          action: "cancel",
-          restaurantId: understanding.entities.venueId || context.activeVenue,
-        },
-        status: "waiting_approval",
-        isDestructive: true,
-        requiresApproval: true,
-      });
-    } else if (understanding.classification === "multi_step_task") {
-      // Step 1: Analytics / Pacing check
-      steps.push({
-        id: `step_${planId}_1`,
-        goal: "Query cross-venue telemetry and pacing metrics",
-        capabilityId: "analytics",
-        toolName: "getVenueAnalytics",
-        arguments: {
-          timeframe: understanding.entities.timeframe || "current_week",
-          venueId: understanding.entities.venueId || context.activeVenue,
-        },
-        status: "pending",
-        isDestructive: false,
-        requiresApproval: false,
-      });
-
-      // Step 2: Next capability action
-      const secondCap = understanding.targetCapabilities.find((c) => c !== "analytics") || "seatbooking";
-      if (secondCap === "workforce") {
-        steps.push({
-          id: `step_${planId}_2`,
-          goal: "Evaluate staff shift pacing against cover trajectories",
-          capabilityId: "workforce",
-          toolName: "workforce_planShifts",
-          arguments: {
-            venueId: understanding.entities.venueId || context.activeVenue,
-          },
-          status: "pending",
-          dependencies: [`step_${planId}_1`],
-          isDestructive: false,
-          requiresApproval: false,
-        });
-      } else {
-        steps.push({
-          id: `step_${planId}_2`,
-          goal: "Inspect reservation pacing and table utilization",
-          capabilityId: "seatbooking",
-          toolName: "getVenueAnalytics",
-          arguments: {
-            timeframe: understanding.entities.timeframe || "current_week",
-            venueId: understanding.entities.venueId || context.activeVenue,
-          },
-          status: "pending",
-          dependencies: [`step_${planId}_1`],
-          isDestructive: false,
-          requiresApproval: false,
-        });
-      }
-    } else {
-      // Single operational or information query
-      const cap = understanding.targetCapabilities[0] || "analytics";
-      const toolName = cap === "seatbooking" && understanding.entities.partySize
-        ? "seatbooking_createReservation"
-        : "getVenueAnalytics";
-
-      const requiresApproval = toolName === "seatbooking_createReservation" && context.autonomyLevel < 2;
-
-      steps.push({
-        id: `step_${planId}_1`,
-        goal: toolName === "seatbooking_createReservation"
-          ? "Create table reservation"
-          : "Retrieve operational telemetry and venue analytics",
-        capabilityId: cap,
-        toolName,
-        arguments: {
-          timeframe: understanding.entities.timeframe || "current_week",
-          venueId: understanding.entities.venueId || context.activeVenue,
-          ...understanding.entities,
-        },
-        status: requiresApproval ? "waiting_approval" : "pending",
-        isDestructive: false,
-        requiresApproval,
-      });
-    }
-
-    const plan: ProsisPlan = {
-      id: planId,
-      userIntent: understanding.intent,
-      classification: understanding.classification,
-      targetCapabilities: understanding.targetCapabilities,
-      steps,
-      currentStepIndex: 0,
-      status: steps.some((s) => s.requiresApproval) ? "waiting_approval" : "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    return plan;
-  }
-
-  /**
-   * Cognitive Stage 3: Execute Plan with Observation & Dynamic Replanning.
-   */
-  public async executePlan(
-    plan: ProsisPlan,
-    context: ProsisContext
-  ): Promise<OrchestrationResult> {
-    plan.status = "in_progress";
-    const toolResults: Record<string, any> = { ...context.previousToolResults };
-
-    // Resolve or build TrustedExecutionContext
+    // Build trusted server-side execution context (The model is NEVER authoritative for identity)
     const trustedContext: TrustedExecutionContext = {
       userId: context.user.id,
       organizationId: context.organization.tenantId || context.organization.id,
@@ -360,15 +95,53 @@ export class ProsisItOrchestrator {
       autonomyLevel: context.autonomyLevel ?? 1,
     };
 
-    for (let i = plan.currentStepIndex; i < plan.steps.length; i++) {
-      const step = plan.steps[i];
-      plan.currentStepIndex = i;
+    // Prepare tools and capabilities descriptors for the LLM
+    const availableCapabilities = CapabilityRegistry.getAll();
+    const availableTools: ProsisAIToolDescriptor[] = ToolRegistry.getAll().map((t) => ({
+      name: t.name,
+      description: t.description,
+      parameters: (t.inputSchema as any)?._def ? { type: "object" } : {},
+      requiresApproval: t.requiresApproval,
+    }));
 
-      // 1. Interruption Check
+    // If getVenueAnalytics is not explicitly in ToolRegistry under that name, add its descriptor
+    if (!availableTools.some((t) => t.name === "getVenueAnalytics")) {
+      availableTools.push({
+        name: "getVenueAnalytics",
+        description: "Retrieve real-time booking trajectories, cover pacing, capacity, and revenue deltas across properties.",
+        parameters: { timeframe: "string", venueId: "string" },
+        requiresApproval: false,
+      });
+    }
+
+    const previousResults: Record<string, any> = { ...context.previousToolResults };
+    const planId = `plan_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const steps: PlanStep[] = [];
+    let loopCount = 0;
+
+    let plan: ProsisPlan = {
+      id: planId,
+      userIntent: trimmedInput,
+      classification: "information_request",
+      targetCapabilities: [],
+      steps,
+      currentStepIndex: 0,
+      status: "in_progress",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.activePlans.set(planId, plan);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DYNAMIC COGNITIVE LOOP: LLM -> Decision -> Server Gateway -> Reflection
+    // ─────────────────────────────────────────────────────────────────────────
+    while (loopCount < ProsisItOrchestrator.MAX_ORCHESTRATION_STEPS) {
+      loopCount++;
+
+      // Check interruption epoch before model turn
       if (context.interruptionEpoch !== undefined) {
         const activeEpoch = ToolExecutionService.getSessionEpoch(context.sessionId);
         if (context.interruptionEpoch < activeEpoch) {
-          step.status = "failed";
           plan.status = "interrupted";
           return {
             state: "INTERRUPTED",
@@ -379,35 +152,160 @@ export class ProsisItOrchestrator {
         }
       }
 
-      // 2. Human Approval Check (Autonomy Level 1 Enforcement)
-      if (step.requiresApproval && step.status === "waiting_approval") {
+      // 1. Build AI Request payload
+      const aiRequest: ProsisAIRequest = {
+        userMessage: trimmedInput,
+        conversationContext: context.conversationHistory,
+        prosisContext: {
+          user: context.user,
+          organization: context.organization,
+          activeProduct: context.activeProduct,
+          activeVenue: context.activeVenue,
+          autonomyLevel: context.autonomyLevel,
+        },
+        availableCapabilities,
+        availableTools,
+        currentPlan: plan,
+        previousResults,
+      };
+
+      // 2. Query Real LLM Reasoning Engine
+      let aiDecision: ProsisAIResponse;
+      try {
+        aiDecision = await this.reasoningEngine.reason(aiRequest);
+      } catch (err: any) {
+        plan.status = "failed";
+        return {
+          state: "FAILED",
+          plan,
+          response: `Reasoning engine error: ${err.message || "Failed to parse model intelligence."}`,
+          error: "REASONING_ERROR",
+        };
+      }
+
+      // Synchronize plan metadata with model's semantic understanding
+      if (plan.classification !== "multi_step_task" || aiDecision.understanding.classification === "multi_step_task") {
+        plan.classification = aiDecision.understanding.classification;
+      }
+      plan.targetCapabilities = Array.from(
+        new Set([...plan.targetCapabilities, ...aiDecision.understanding.targetCapabilities])
+      );
+      plan.explanation = aiDecision.reasoningSummary;
+
+      // 3. ACTION: Clarification Needed
+      if (aiDecision.nextAction === "clarification" || aiDecision.needsMoreInformation) {
+        const clarificationMsg =
+          aiDecision.clarificationPrompt || "Additional parameters are required to proceed with this directive.";
+        context.conversationHistory.push({
+          role: "assistant",
+          content: clarificationMsg,
+          timestamp: new Date().toISOString(),
+        });
+        return {
+          state: "WAITING_FOR_INFORMATION",
+          plan,
+          response: clarificationMsg,
+          reasoningSummary: aiDecision.reasoningSummary,
+          requiresClarification: true,
+        };
+      }
+
+      // 4. ACTION: Human Approval Required (Autonomy Level 1 Policy Enforcement)
+      const isDestructive =
+        aiDecision.understanding.isDestructive ||
+        aiDecision.understanding.classification === "destructive_action" ||
+        Boolean(aiDecision.requiresApproval);
+
+      if (
+        aiDecision.nextAction === "approval_required" ||
+        (isDestructive && context.autonomyLevel < 2)
+      ) {
+        const stepId = `step_${planId}_${steps.length + 1}`;
+        const step: PlanStep = {
+          id: stepId,
+          goal: aiDecision.goal || "Execute high-impact operation",
+          capabilityId: aiDecision.selectedCapability || "operations",
+          toolName: aiDecision.selectedTool || "destructive_action",
+          arguments: aiDecision.toolArguments || {},
+          status: "waiting_approval",
+          isDestructive: true,
+          requiresApproval: true,
+        };
+        steps.push(step);
+        plan.status = "waiting_approval";
+
         const approval: PendingApproval = {
-          id: `appr_${step.id}`,
+          id: `appr_${stepId}`,
           planId: plan.id,
-          stepId: step.id,
+          stepId,
           actionSummary: step.goal,
           toolName: step.toolName,
           arguments: step.arguments,
-          impact: step.isDestructive ? "high" : "medium",
-          isDestructive: step.isDestructive,
+          impact: "high",
+          isDestructive: true,
           timestamp: new Date().toISOString(),
           status: "pending",
         };
 
         this.pendingApprovals.set(approval.id, approval);
         context.pendingApprovals.push(approval);
-        plan.status = "waiting_approval";
+
+        const approvalPrompt = `Approval required: ${step.goal}. This operation has high operational impact. Awaiting confirmation.`;
+        context.conversationHistory.push({
+          role: "assistant",
+          content: approvalPrompt,
+          timestamp: new Date().toISOString(),
+        });
 
         return {
           state: "WAITING_FOR_APPROVAL",
           plan,
           activeStep: step,
           pendingApproval: approval,
-          response: `Approval required: ${step.goal}. This operation has ${approval.impact} operational impact. Awaiting confirmation.`,
+          response: approvalPrompt,
+          reasoningSummary: aiDecision.reasoningSummary,
         };
       }
 
-      // 3. Capability status check (handle future capabilities gracefully)
+      // 5. ACTION: Final Direct Response Synthesized by Model
+      if (aiDecision.nextAction === "response" || !aiDecision.selectedTool) {
+        plan.status = "completed";
+        const finalMsg =
+          aiDecision.finalResponse ||
+          aiDecision.goal ||
+          "Directive completed successfully.";
+
+        context.conversationHistory.push({
+          role: "assistant",
+          content: finalMsg,
+          timestamp: new Date().toISOString(),
+        });
+
+        return {
+          state: "COMPLETED",
+          plan,
+          response: finalMsg,
+          toolResults: previousResults,
+          reasoningSummary: aiDecision.reasoningSummary,
+        };
+      }
+
+      // 6. ACTION: Tool Request Dispatch Through Server Gateway
+      const stepId = `step_${planId}_${steps.length + 1}`;
+      const step: PlanStep = {
+        id: stepId,
+        goal: aiDecision.goal,
+        capabilityId: aiDecision.selectedCapability || "analytics",
+        toolName: aiDecision.selectedTool,
+        arguments: aiDecision.toolArguments || {},
+        status: "executing",
+        isDestructive: false,
+        requiresApproval: false,
+      };
+      steps.push(step);
+      plan.currentStepIndex = steps.length - 1;
+
+      // Handle roadmap future capabilities gracefully
       const cap = CapabilityRegistry.get(step.capabilityId);
       if (cap && cap.status === "future") {
         step.status = "completed";
@@ -415,17 +313,14 @@ export class ProsisItOrchestrator {
           status: "planned",
           message: `${cap.name} is on the Prosis roadmap (${cap.futureRoadmapNotes || "In development"}).`,
         };
-        toolResults[step.id] = step.result;
+        previousResults[stepId] = step.result;
         continue;
       }
 
-      // 4. Secure Dispatch to ToolExecutionService
-      step.status = "executing";
-      const startTime = Date.now();
-
+      const execStartTime = Date.now();
       const execResult = await ToolExecutionService.execute(
         {
-          requestId: `req_${Date.now()}_${i}`,
+          requestId: `req_${Date.now()}_${steps.length}`,
           sessionId: context.sessionId,
           conversationId: context.conversationId,
           toolName: step.toolName,
@@ -435,38 +330,22 @@ export class ProsisItOrchestrator {
         trustedContext
       );
 
-      step.executionDurationMs = Date.now() - startTime;
+      step.executionDurationMs = Date.now() - execStartTime;
 
-      // 5. OBSERVING & EVALUATING RESULT
+      // Telemetry / Error Evaluation
       if (!execResult.success) {
         step.status = "failed";
         step.error = execResult.error?.message;
         plan.status = "failed";
 
-        // Evaluate error taxonomy
         const errorCode = execResult.error?.code;
+        let responseMsg = `Execution halted at step '${step.goal}': ${execResult.error?.message || "Internal gateway error"}.`;
 
         if (errorCode === "AUTHORIZATION_DENIED") {
-          return {
-            state: "FAILED",
-            plan,
-            activeStep: step,
-            response: `Access restricted. User role '${context.user.role}' lacks required permissions to execute ${step.toolName}.`,
-            error: "AUTHORIZATION_DENIED",
-          };
-        }
-
-        if (errorCode === "RESOURCE_FORBIDDEN") {
-          return {
-            state: "FAILED",
-            plan,
-            activeStep: step,
-            response: `Venue boundary violation. You do not have authorization to access '${step.arguments.venueId || step.arguments.restaurantId}'.`,
-            error: "RESOURCE_FORBIDDEN",
-          };
-        }
-
-        if (errorCode === "STALE_REQUEST") {
+          responseMsg = `Access restricted. User role '${context.user.role}' lacks required permissions to execute ${step.toolName}.`;
+        } else if (errorCode === "RESOURCE_FORBIDDEN") {
+          responseMsg = `Venue boundary violation. You do not have authorization to access '${step.arguments.venueId || step.arguments.restaurantId}'.`;
+        } else if (errorCode === "STALE_REQUEST") {
           plan.status = "interrupted";
           return {
             state: "INTERRUPTED",
@@ -477,31 +356,36 @@ export class ProsisItOrchestrator {
           };
         }
 
-        // Attempt replanning or return clean failure
+        context.conversationHistory.push({
+          role: "assistant",
+          content: responseMsg,
+          timestamp: new Date().toISOString(),
+        });
+
         return {
           state: "FAILED",
           plan,
           activeStep: step,
-          response: `Execution halted at step '${step.goal}': ${execResult.error?.message || "Internal gateway error"}.`,
+          response: responseMsg,
           error: errorCode || "TOOL_EXECUTION_FAILED",
+          reasoningSummary: aiDecision.reasoningSummary,
         };
       }
 
-      // Step Succeeded
+      // Step Succeeded: Record Telemetry and loop back to Model for Reflection
       step.status = "completed";
       step.result = execResult.data;
-      toolResults[step.id] = execResult.data;
+      previousResults[stepId] = execResult.data;
+      context.previousToolResults[stepId] = execResult.data;
     }
 
-    // All steps executed successfully
+    // Fallback if max loop iterations reached
     plan.status = "completed";
-    const executiveResponse = this.synthesizeExecutiveResponse(plan, toolResults);
-
     return {
       state: "COMPLETED",
       plan,
-      response: executiveResponse,
-      toolResults,
+      response: "Operation completed. All requested parameters processed.",
+      toolResults: previousResults,
     };
   }
 
@@ -539,7 +423,59 @@ export class ProsisItOrchestrator {
       step.status = "pending";
     }
 
-    return await this.executePlan(plan, context);
+    // Dispatch approved action through server gateway
+    const trustedContext: TrustedExecutionContext = {
+      userId: context.user.id,
+      organizationId: context.organization.tenantId || context.organization.id,
+      role: context.user.role,
+      permissions: context.user.permissions,
+      sessionId: context.sessionId,
+      requestId: `req_appr_${Date.now()}`,
+      autonomyLevel: context.autonomyLevel ?? 1,
+    };
+
+    if (step) {
+      step.status = "executing";
+      const execResult = await ToolExecutionService.execute(
+        {
+          requestId: `req_appr_exec_${Date.now()}`,
+          sessionId: context.sessionId,
+          conversationId: context.conversationId,
+          toolName: step.toolName,
+          arguments: step.arguments,
+          interruptionEpoch: context.interruptionEpoch,
+        },
+        trustedContext
+      );
+
+      if (execResult.success) {
+        step.status = "completed";
+        step.result = execResult.data;
+        plan.status = "completed";
+        return {
+          state: "COMPLETED",
+          plan,
+          response: `Approved action '${step.goal}' executed successfully.`,
+          toolResults: { [step.id]: execResult.data },
+        };
+      } else {
+        step.status = "failed";
+        step.error = execResult.error?.message;
+        plan.status = "failed";
+        return {
+          state: "FAILED",
+          plan,
+          response: `Approved action failed: ${execResult.error?.message || "Execution error"}`,
+          error: execResult.error?.code || "EXECUTION_FAILED",
+        };
+      }
+    }
+
+    return {
+      state: "COMPLETED",
+      plan,
+      response: "Approved action completed.",
+    };
   }
 
   /**
@@ -559,65 +495,5 @@ export class ProsisItOrchestrator {
       state: "COMPLETED",
       response: `Action rejected: ${reason}`,
     };
-  }
-
-  /**
-   * Handles conversational, orientation, and identity inquiries.
-   */
-  private handleConversation(
-    understanding: IntentUnderstanding,
-    rawInput: string
-  ): string {
-    if (understanding.intent === "greeting") {
-      return "Prosis executive intelligence operating system online. Ready for operational directives.";
-    }
-
-    if (understanding.intent === "ecosystem_inquiry") {
-      return CapabilityRegistry.formatEcosystemSummary();
-    }
-
-    return "Prosis intelligence operating system standing by. State your query or operational requirement.";
-  }
-
-  /**
-   * Synthesizes a calm, authoritative response from completed plan results.
-   */
-  private synthesizeExecutiveResponse(
-    plan: ProsisPlan,
-    toolResults: Record<string, any>
-  ): string {
-    const lines: string[] = [];
-
-    for (const step of plan.steps) {
-      const data = toolResults[step.id];
-      if (!data) continue;
-
-      if (step.capabilityId === "analytics" || step.toolName === "getVenueAnalytics") {
-        const venueArg = step.arguments.venueId || step.arguments.restaurantId;
-        const venue = (venueArg && venueArg !== "all")
-          ? (venueArg === "cantina_bella" ? "Cantina Bella" : venueArg)
-          : (data.venueName || "Portfolio");
-        const pacing = data.bookingVelocity || (data.weeklyPacingTrendPercent ? `${data.weeklyPacingTrendPercent}% trend` : "on pace");
-        const covers = data.totalCovers !== undefined
-          ? `${data.totalCovers} covers booked`
-          : (data.covers !== undefined ? `${data.covers} covers` : "cover pacing verified");
-        const revenue = data.projectedRevenueUsd || data.projectedRevenue
-          ? `Revenue trajectory is $${(data.projectedRevenueUsd || data.projectedRevenue).toLocaleString()}`
-          : "";
-        lines.push(`${venue}: ${covers} (${pacing}). ${revenue}`.trim());
-      } else if (step.capabilityId === "workforce") {
-        lines.push(`Workforce telemetry: Shift coverage balanced against cover pacing targets.`);
-      } else if (step.capabilityId === "seatbooking") {
-        lines.push(`Reservation confirmed. Dining table allocation secured.`);
-      } else {
-        lines.push(`Step '${step.goal}' completed.`);
-      }
-    }
-
-    if (lines.length === 0) {
-      return "Directive executed successfully. All parameters verified.";
-    }
-
-    return lines.join(" ");
   }
 }

@@ -208,3 +208,4 @@ class ProsisCapabilityRegistry {
 }
 
 export const CapabilityRegistry = new ProsisCapabilityRegistry();
+

@@ -4,6 +4,8 @@
  * and context types for the Prosis central AI Operating System.
  */
 
+import { z } from "zod";
+
 export type ProsisOrchestrationState =
   | "IDLE"
   | "UNDERSTANDING"
@@ -35,6 +37,12 @@ export interface ProsisOrgContext {
   id: string;
   name?: string;
   tenantId: string;
+}
+
+export interface ConversationTurn {
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: string;
 }
 
 export interface PendingApproval {
@@ -75,6 +83,7 @@ export interface ProsisContext {
   autonomyLevel: number; // 0 = assistive, 1 = supervised (approval needed for mutations), 2 = autonomous
   availableCapabilities?: CapabilityDefinition[];
   interruptionEpoch?: number;
+  conversationHistory?: ConversationTurn[];
 }
 
 export type PlanStepStatus =
@@ -153,4 +162,84 @@ export interface OrchestrationResult {
   error?: string;
   requiresClarification?: boolean;
   missingParameters?: string[];
+  reasoningSummary?: string;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Real LLM Reasoning Engine Contracts
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ProsisAINextAction =
+  | "tool_request"
+  | "clarification"
+  | "response"
+  | "approval_required";
+
+export interface ProsisAIToolDescriptor {
+  name: string;
+  description: string;
+  parameters: Record<string, any>;
+  requiresApproval: boolean;
+}
+
+export interface ProsisAIRequest {
+  userMessage: string;
+  conversationContext: ConversationTurn[];
+  prosisContext: {
+    user: ProsisUserContext;
+    organization: ProsisOrgContext;
+    activeProduct: string;
+    activeVenue: string;
+    autonomyLevel: number;
+  };
+  availableCapabilities: CapabilityDefinition[];
+  availableTools: ProsisAIToolDescriptor[];
+  currentPlan?: ProsisPlan;
+  previousResults?: Record<string, any>;
+}
+
+export interface ProsisAIResponse {
+  understanding: {
+    intent: string;
+    classification: RequestClassification;
+    targetCapabilities: string[];
+    isDestructive: boolean;
+    confidence: number;
+  };
+  goal: string;
+  reasoningSummary: string; // Concise user-safe explanation, NOT hidden chain-of-thought
+  nextAction: ProsisAINextAction;
+  selectedCapability?: string;
+  selectedTool?: string;
+  toolArguments?: Record<string, any>;
+  requiresApproval?: boolean;
+  needsMoreInformation?: boolean;
+  clarificationPrompt?: string;
+  finalResponse?: string;
+}
+
+export const ProsisAIResponseSchema = z.object({
+  understanding: z.object({
+    intent: z.string(),
+    classification: z.enum([
+      "conversation",
+      "information_request",
+      "business_operation",
+      "multi_step_task",
+      "destructive_action",
+    ]),
+    targetCapabilities: z.array(z.string()),
+    isDestructive: z.boolean(),
+    confidence: z.number().min(0).max(1),
+  }),
+  goal: z.string(),
+  reasoningSummary: z.string(),
+  nextAction: z.enum(["tool_request", "clarification", "response", "approval_required"]),
+  selectedCapability: z.string().optional(),
+  selectedTool: z.string().optional(),
+  toolArguments: z.record(z.string(), z.any()).optional(),
+  requiresApproval: z.boolean().optional(),
+  needsMoreInformation: z.boolean().optional(),
+  clarificationPrompt: z.string().optional(),
+  finalResponse: z.string().optional(),
+});

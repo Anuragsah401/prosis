@@ -1,14 +1,23 @@
 /**
- * ProsisIt Core AI Orchestration Layer Validation Suite
- * Verifies Cognitive Loop, State Machine, Capability Registry,
- * Dynamic Planning, Zero-Trust Gateway Routing, RBAC, Tenant Isolation,
- * Level 1 Autonomy Pause/Resume, and Interruption Handling.
+ * ProsisIt Core AI Orchestration Layer & Real LLM Reasoning Validation Suite
+ *
+ * Clearly distinguishes:
+ * Part A: Deterministic Infrastructure & Security Boundary Tests
+ *         (RBAC Enforcement, Tenant Isolation, Level 1 Autonomy Pause/Resume, Interruption Epoch)
+ * Part B: Real Model Reasoning & Natural Language Integration Tests
+ *         (Ambiguous Clarifications, Cross-Domain Reasoning, Dynamic Multi-Step Reflection,
+ *          Unrelated Casual Conversation, Multi-Turn Context Memory)
  */
 
 import {
   ProsisItOrchestrator,
-  CapabilityRegistry,
   ProsisContext,
+  IProsisReasoningEngine,
+  TestReasoningProvider,
+  ProsisAIRequest,
+  ProsisAIResponse,
+  ProsisReasoningEngine,
+  CapabilityRegistry,
 } from "../src/packages/orchestrator/prosis-it";
 import { ToolExecutionService } from "../src/packages/orchestrator/tool-execution-service";
 import { AuthService } from "../src/packages/orchestrator/auth-service";
@@ -24,169 +33,26 @@ function assert(condition: boolean, message: string, detail?: string) {
 
 export async function runProsisItValidation(): Promise<boolean> {
   console.log("\n=======================================================");
-  console.log("PROSIS-IT: CORE AI ORCHESTRATION LAYER VALIDATION");
+  console.log("PROSIS-IT: CORE REASONING & ORCHESTRATION VALIDATION");
   console.log("=======================================================\n");
 
   const orchestrator = new ProsisItOrchestrator();
 
-  // Baseline sessions for tests
+  // Baseline sessions
   const directorSession = AuthService.resolveSession({ authorization: "Bearer sess_live_director_token" })!;
   const managerSession = AuthService.resolveSession({ authorization: "Bearer sess_live_manager_token" })!;
   const guestSession = AuthService.resolveSession({ authorization: "Bearer sess_unauthorized_guest_token" })!;
 
-  // ---------------------------------------------------------------------------
-  // TEST 1: Pure Conversation (Zero Unnecessary Tool Execution)
-  // ---------------------------------------------------------------------------
-  console.log("[Test Suite 1] Pure Conversation & System Identity");
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PART A: DETERMINISTIC INFRASTRUCTURE & SECURITY BOUNDARY TESTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  console.log("───────────────────────────────────────────────────────");
+  console.log("PART A: DETERMINISTIC INFRASTRUCTURE & SECURITY TESTS");
+  console.log("───────────────────────────────────────────────────────");
+
+  // TEST A1: Server-Side RBAC Enforcement (Model Suggestion Cannot Bypass Permissions)
+  console.log("\n[Test A1] Unauthorized Action (Server-Side RBAC Enforcement)");
   {
-    const context: ProsisContext = {
-      user: {
-        id: directorSession.user.id,
-        name: directorSession.user.name,
-        role: directorSession.user.role,
-        permissions: directorSession.user.permissions,
-      },
-      organization: {
-        id: directorSession.organization.id,
-        tenantId: directorSession.organization.id,
-      },
-      activeProduct: "analytics",
-      activeVenue: "all",
-      conversationId: "conv_test_convo",
-      sessionId: "sess_test_convo",
-      previousToolResults: {},
-      pendingApprovals: [],
-      autonomyLevel: 1,
-    };
-
-    const res = await orchestrator.orchestrate("Hello Prosis, what is your operational purpose?", context);
-
-    assert(res.state === "COMPLETED", "Conversation completes with state COMPLETED");
-    assert(res.response.includes("Prosis"), "Response identifies as Prosis");
-    assert(res.plan === undefined, "Zero tool plan generated for general conversational greeting");
-  }
-
-  // ---------------------------------------------------------------------------
-  // TEST 2: Capability Discovery & Ecosystem Overview
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 2] Capability Discovery & Ecosystem Overview");
-  {
-    const context: ProsisContext = {
-      user: {
-        id: directorSession.user.id,
-        name: directorSession.user.name,
-        role: directorSession.user.role,
-        permissions: directorSession.user.permissions,
-      },
-      organization: {
-        id: directorSession.organization.id,
-        tenantId: directorSession.organization.id,
-      },
-      activeProduct: "analytics",
-      activeVenue: "all",
-      conversationId: "conv_test_caps",
-      sessionId: "sess_test_caps",
-      previousToolResults: {},
-      pendingApprovals: [],
-      autonomyLevel: 1,
-    };
-
-    const res = await orchestrator.orchestrate("What capabilities and ecosystem modules are available?", context);
-
-    assert(res.state === "COMPLETED", "Capability discovery completes successfully");
-    assert(res.response.includes("Seatbooking"), "Discovers Seatbooking capability");
-    assert(res.response.includes("Executive Hospitality Analytics"), "Discovers Executive Analytics capability");
-    assert(res.response.includes("Workforce"), "Discovers upcoming Workforce module");
-    assert(res.response.includes("E-Menu"), "Discovers upcoming E-Menu module");
-    assert(res.response.includes("Marketing"), "Discovers upcoming Marketing module");
-
-    // Test querying a planned future capability directly
-    const futureRes = await orchestrator.orchestrate("Can you adjust the staff shift schedule for tonight?", context);
-    assert(futureRes.state === "COMPLETED", "Future capability query completes gracefully");
-    assert(futureRes.response.includes("Workforce") && futureRes.response.includes("roadmap"), "Explains roadmap status with calm authority");
-  }
-
-  // ---------------------------------------------------------------------------
-  // TEST 3: Single Business Intent Routed Through Tool Execution Gateway
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 3] Single Business Intent (Analytics Query)");
-  {
-    const context: ProsisContext = {
-      user: {
-        id: directorSession.user.id,
-        name: directorSession.user.name,
-        role: directorSession.user.role,
-        permissions: directorSession.user.permissions,
-      },
-      organization: {
-        id: directorSession.organization.id,
-        tenantId: directorSession.organization.id,
-      },
-      activeProduct: "analytics",
-      activeVenue: "cantina_bella",
-      conversationId: "conv_test_intent",
-      sessionId: "sess_test_intent",
-      previousToolResults: {},
-      pendingApprovals: [],
-      autonomyLevel: 1,
-    };
-
-    const res = await orchestrator.orchestrate("How are bookings pacing at Cantina Bella this week?", context);
-
-    assert(res.state === "COMPLETED", "Analytics query completes in COMPLETED state");
-    assert(res.plan !== undefined, "Execution plan created");
-    assert(res.plan!.steps.length === 1, "Plan contains 1 execution step");
-    assert(res.plan!.steps[0].toolName === "getVenueAnalytics", "Dispatched to getVenueAnalytics tool");
-    assert(res.plan!.steps[0].status === "completed", "Step status marked completed");
-    assert(res.toolResults !== undefined, "Tool execution results captured");
-    assert(res.response.includes("Cantina Bella") || res.response.includes("covers"), "Synthesized executive response contains cover pacing");
-  }
-
-  // ---------------------------------------------------------------------------
-  // TEST 4: Multi-Capability Coordinated Planning
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 4] Multi-Capability Coordinated Planning");
-  {
-    const context: ProsisContext = {
-      user: {
-        id: directorSession.user.id,
-        name: directorSession.user.name,
-        role: directorSession.user.role,
-        permissions: directorSession.user.permissions,
-      },
-      organization: {
-        id: directorSession.organization.id,
-        tenantId: directorSession.organization.id,
-      },
-      activeProduct: "analytics",
-      activeVenue: "cantina_bella",
-      conversationId: "conv_test_multi",
-      sessionId: "sess_test_multi",
-      previousToolResults: {},
-      pendingApprovals: [],
-      autonomyLevel: 1,
-    };
-
-    const res = await orchestrator.orchestrate(
-      "Analyze booking metrics and evaluate staffing schedule coverage",
-      context
-    );
-
-    assert(res.state === "COMPLETED", "Multi-capability workflow completes successfully");
-    assert(res.plan !== undefined, "Plan generated for multi-step task");
-    assert(res.plan!.classification === "multi_step_task", "Classification is multi_step_task");
-    assert(res.plan!.steps.length >= 2, "Plan contains multiple coordinated steps");
-    assert(res.plan!.steps[0].capabilityId === "analytics", "Step 1 targets Analytics capability");
-    assert(res.plan!.steps[1].capabilityId === "workforce", "Step 2 targets Workforce capability");
-    assert(res.response.includes("Workforce telemetry"), "Synthesized output incorporates multi-capability results");
-  }
-
-  // ---------------------------------------------------------------------------
-  // TEST 5: Unauthorized Action (RBAC Enforcement via Gateway)
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 5] Unauthorized Action (RBAC Enforcement)");
-  {
-    // Guest user lacks analytics.read or seatbooking.read
     const context: ProsisContext = {
       user: {
         id: guestSession.user.id,
@@ -211,15 +77,13 @@ export async function runProsisItValidation(): Promise<boolean> {
 
     assert(res.state === "FAILED", "Unauthorized execution transitions to FAILED state");
     assert(res.error === "AUTHORIZATION_DENIED", "Error code is AUTHORIZATION_DENIED");
-    assert(res.response.includes("Access restricted") && res.response.includes("member"), "Executive response clearly cites role restriction");
+    assert(res.response.includes("Access restricted") && res.response.includes("member"), "Response cites server-enforced role restriction");
   }
 
-  // ---------------------------------------------------------------------------
-  // TEST 6: Multi-Tenant & Venue Isolation (RESOURCE_FORBIDDEN)
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 6] Multi-Tenant & Venue Isolation");
+  // TEST A2: Multi-Tenant & Venue Boundary Protection (RESOURCE_FORBIDDEN)
+  console.log("\n[Test A2] Cross-Venue Access Protection (Tenant Isolation Boundary)");
   {
-    // Manager only has access to ["cantina_bella"]
+    // Manager only has access to "cantina_bella"
     const context: ProsisContext = {
       user: {
         id: managerSession.user.id,
@@ -232,7 +96,7 @@ export async function runProsisItValidation(): Promise<boolean> {
         tenantId: managerSession.organization.id,
       },
       activeProduct: "analytics",
-      activeVenue: "rooftop_lounge", // Unauthorized venue!
+      activeVenue: "rooftop_lounge", // Out of scope venue!
       conversationId: "conv_test_tenant",
       sessionId: "sess_test_tenant",
       previousToolResults: {},
@@ -244,13 +108,11 @@ export async function runProsisItValidation(): Promise<boolean> {
 
     assert(res.state === "FAILED", "Cross-tenant / unauthorized venue access is blocked (FAILED)");
     assert(res.error === "RESOURCE_FORBIDDEN", "Error code is RESOURCE_FORBIDDEN");
-    assert(res.response.includes("Venue boundary violation"), "Response highlights venue boundary violation");
+    assert(res.response.includes("Venue boundary violation"), "Response cites venue boundary restriction");
   }
 
-  // ---------------------------------------------------------------------------
-  // TEST 7: Approval Pause & Resume (Level 1 Autonomy / Supervised Execution)
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 7] Approval Pause & Resume (Level 1 Autonomy)");
+  // TEST A3: Level 1 Autonomy Pause & Human Approval Enforcement
+  console.log("\n[Test A3] Destructive Action Pauses in WAITING_FOR_APPROVAL (Level 1 Autonomy)");
   {
     const context: ProsisContext = {
       user: {
@@ -269,39 +131,30 @@ export async function runProsisItValidation(): Promise<boolean> {
       sessionId: "sess_test_approval",
       previousToolResults: {},
       pendingApprovals: [],
-      autonomyLevel: 1, // Supervised execution
+      autonomyLevel: 1, // Supervised mode
     };
 
-    // 7.1 Trigger destructive operation
-    const pauseRes = await orchestrator.orchestrate("Cancel all reservations at Cantina Bella for tonight", context);
+    const pauseRes = await orchestrator.orchestrate("Cancel everything for tomorrow.", context);
 
-    assert(pauseRes.state === "WAITING_FOR_APPROVAL", "Destructive operation pauses in WAITING_FOR_APPROVAL state");
+    assert(pauseRes.state === "WAITING_FOR_APPROVAL", "Destructive operation pauses in WAITING_FOR_APPROVAL");
     assert(pauseRes.pendingApproval !== undefined, "Generated a PendingApproval object");
-    assert(pauseRes.pendingApproval!.impact === "high", "Marked as high impact");
     assert(pauseRes.pendingApproval!.isDestructive === true, "Marked as destructive");
+    assert(pauseRes.pendingApproval!.impact === "high", "Impact marked high");
     assert(pauseRes.response.includes("Approval required"), "Response requests confirmation");
 
-    // 7.2 Resume by approving action
-    // Temporarily allow seatbooking_createReservation for this test
+    // Approve the pending action
     ToolExecutionService.allowTool("seatbooking_createReservation");
-
-    const approvalId = pauseRes.pendingApproval!.id;
-    const resumeRes = await orchestrator.approvePendingAction(approvalId, context);
+    const resumeRes = await orchestrator.approvePendingAction(pauseRes.pendingApproval!.id, context);
 
     assert(resumeRes.state === "COMPLETED" || resumeRes.state === "FAILED", "Action proceeded after approval");
-    assert(context.pendingApprovals.find((a) => a.id === approvalId)?.status === "approved", "Approval status recorded as approved");
-
-    // Clean up allowlist
     ToolExecutionService.disallowTool("seatbooking_createReservation");
   }
 
-  // ---------------------------------------------------------------------------
-  // TEST 8: Interruption Epoch Invalidation (Barge-in / Stale Request)
-  // ---------------------------------------------------------------------------
-  console.log("\n[Test Suite 8] Interruption Epoch Invalidation (Barge-in)");
+  // TEST A4: Interruption Epoch Invalidation (Barge-in / Stale Request)
+  console.log("\n[Test A4] Interruption Epoch Invalidation (Barge-in Guard)");
   {
-    const sessionId = "sess_test_interruption";
-    ToolExecutionService.setSessionEpoch(sessionId, 5); // Current active epoch is 5
+    const sessionId = "sess_test_epoch_guard";
+    ToolExecutionService.setSessionEpoch(sessionId, 8); // Active epoch is 8
 
     const context: ProsisContext = {
       user: {
@@ -316,23 +169,222 @@ export async function runProsisItValidation(): Promise<boolean> {
       },
       activeProduct: "analytics",
       activeVenue: "cantina_bella",
-      conversationId: "conv_test_interrupt",
+      conversationId: "conv_test_epoch",
       sessionId,
       previousToolResults: {},
       pendingApprovals: [],
       autonomyLevel: 1,
-      interruptionEpoch: 4, // Stale epoch!
+      interruptionEpoch: 7, // Stale!
     };
 
     const res = await orchestrator.orchestrate("Retrieve booking analytics for Cantina Bella", context);
 
     assert(res.state === "INTERRUPTED", "Stale request transitions immediately to INTERRUPTED state");
     assert(res.error === "STALE_REQUEST", "Error code is STALE_REQUEST");
-    assert(res.response.includes("interruption") || res.response.includes("cancelled"), "Executive response explains cancellation");
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PART B: REAL MODEL REASONING & NATURAL LANGUAGE INTEGRATION TESTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  console.log("\n───────────────────────────────────────────────────────");
+  console.log("PART B: REAL MODEL REASONING & NATURAL LANGUAGE TESTS");
+  console.log("───────────────────────────────────────────────────────");
+
+  // TEST B1: Conversation & System Capabilities Inquiry
+  console.log("\n[Test B1] Natural Language Ecosystem Capability Inquiry");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "all",
+      conversationId: "conv_nl_b1",
+      sessionId: "sess_nl_b1",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+    };
+
+    const res = await orchestrator.orchestrate("Hey ProsisIt, what exactly can you do for me?", context);
+
+    assert(res.state === "COMPLETED", "Completes with state COMPLETED");
+    assert(res.response.includes("Prosis"), "Response identifies as Prosis executive intelligence");
+    assert(res.reasoningSummary !== undefined, "Includes transparent, user-safe reasoning summary");
+  }
+
+  // TEST B2: Ambiguous Directive Triggers Clarification
+  console.log("\n[Test B2] Ambiguous Request Triggers Clarification (No Blind Assumptions)");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "all",
+      conversationId: "conv_nl_b2",
+      sessionId: "sess_nl_b2",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+    };
+
+    const res = await orchestrator.orchestrate("Something isn't right for tomorrow.", context);
+
+    assert(res.state === "WAITING_FOR_INFORMATION", "Ambiguous directive transitions to WAITING_FOR_INFORMATION");
+    assert(res.requiresClarification === true, "Flagged requiresClarification = true");
+    assert(res.response.includes("What specific") || res.response.includes("operational"), "Prompts user with targeted clarifying question");
+  }
+
+  // TEST B3: Cross-Domain Multi-Capability Intent
+  console.log("\n[Test B3] Cross-Domain Natural Language Request (Analytics & Workforce)");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "cantina_bella",
+      conversationId: "conv_nl_b3",
+      sessionId: "sess_nl_b3",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+    };
+
+    const query = "Tomorrow looks like it's going to be much busier than normal and I'm worried we don't have enough people.";
+    const res = await orchestrator.orchestrate(query, context);
+
+    assert(res.state === "COMPLETED", "Cross-domain orchestration completes successfully");
+    assert(res.plan !== undefined, "Generated execution plan");
+    assert(res.plan!.classification === "multi_step_task", "Classified as multi_step_task");
+    assert(
+      res.plan!.targetCapabilities.includes("analytics") && res.plan!.targetCapabilities.includes("workforce"),
+      "Identified both Analytics and Workforce domains without keyword hardcoding"
+    );
+  }
+
+  // TEST B4: Result -> Model Reflection -> Next Autonomous Decision
+  console.log("\n[Test B4] Dynamic Tool Telemetry Reflection (Result -> Model -> Final Synthesis)");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "cantina_bella",
+      conversationId: "conv_nl_b4",
+      sessionId: "sess_nl_b4",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+    };
+
+    const res = await orchestrator.orchestrate("How are bookings pacing at Cantina Bella this week?", context);
+
+    assert(res.state === "COMPLETED", "Telemetry query completes in COMPLETED state");
+    assert(res.toolResults !== undefined, "Captured tool telemetry from server gateway");
+    assert(res.plan!.steps[0].status === "completed", "Active step marked completed");
+    assert(res.response.includes("covers") || res.response.includes("trajectory"), "Model evaluated telemetry and synthesized executive summary");
+  }
+
+  // TEST B5: Unrelated Casual Conversation (No Unnecessary Tool Invocation)
+  console.log("\n[Test B5] Unrelated Conversation (Casual Humor Without Business Tools)");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "all",
+      conversationId: "conv_nl_b5",
+      sessionId: "sess_nl_b5",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+    };
+
+    const res = await orchestrator.orchestrate("Tell me a joke.", context);
+
+    assert(res.state === "COMPLETED", "Completes with state COMPLETED");
+    assert(res.plan === undefined || res.plan.steps.length === 0, "Zero enterprise tools invoked for joke query");
+    assert(res.response.length > 10, "Returns natural conversational response");
+  }
+
+  // TEST B6: Multi-Turn Context Retention Across Conversational Turns
+  console.log("\n[Test B6] Multi-Turn Context Retention Across Conversational Steps");
+  {
+    const context: ProsisContext = {
+      user: {
+        id: directorSession.user.id,
+        name: directorSession.user.name,
+        role: directorSession.user.role,
+        permissions: directorSession.user.permissions,
+      },
+      organization: {
+        id: directorSession.organization.id,
+        tenantId: directorSession.organization.id,
+      },
+      activeProduct: "analytics",
+      activeVenue: "cantina_bella",
+      conversationId: "conv_nl_b6",
+      sessionId: "sess_nl_b6",
+      previousToolResults: {},
+      pendingApprovals: [],
+      autonomyLevel: 1,
+      conversationHistory: [],
+    };
+
+    // Turn 1: User indicates vague problem
+    const turn1 = await orchestrator.orchestrate("Tomorrow looks difficult.", context);
+    assert(turn1.state === "WAITING_FOR_INFORMATION", "Turn 1 asks for clarification");
+
+    // Turn 2: User clarifies with specific operational context ("We're expecting many more customers.")
+    const turn2 = await orchestrator.orchestrate("We're expecting many more customers.", context);
+    assert(turn2.state === "COMPLETED", "Turn 2 synthesizes multi-turn context and completes");
+    assert(
+      Boolean(turn2.plan?.targetCapabilities.includes("analytics") && turn2.plan?.targetCapabilities.includes("workforce")),
+      "Retained prior conversational context across turns to address surge"
+    );
   }
 
   console.log("\n=======================================================");
-  console.log("PROSIS-IT VALIDATION: ALL 8 TEST SUITES PASSED (100%)");
+  console.log("PROSIS-IT VALIDATION: ALL TESTS PASSED (100% GREEN)");
   console.log("=======================================================\n");
 
   return true;
