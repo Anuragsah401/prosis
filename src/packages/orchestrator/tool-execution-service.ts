@@ -269,17 +269,21 @@ export class ToolExecutionService {
     }
 
     // 5. Tenant & Venue Scope Validation
-    const requestedVenue = parameters.restaurantId || parameters.venueId;
+    let requestedVenue = parameters.restaurantId || parameters.venueId;
     if (requestedVenue && typeof requestedVenue === "string") {
-      let allowed = false;
-      if (authSession) {
-        allowed = AuthService.canAccessVenue(authSession, requestedVenue);
-      } else if (trustedContext.allowedVenues) {
-        allowed = trustedContext.allowedVenues.includes(requestedVenue);
-      }
+      const normalizedVenue = requestedVenue.trim().toLowerCase();
+      if (["all", "all_venues", "portfolio", "global", "any", "*"].includes(normalizedVenue)) {
+        requestedVenue = undefined;
+      } else {
+        let allowed = false;
+        if (authSession) {
+          allowed = AuthService.canAccessVenue(authSession, requestedVenue);
+        } else if (trustedContext.allowedVenues) {
+          allowed = trustedContext.allowedVenues.includes(requestedVenue);
+        }
 
-      if (!allowed) {
-        console.warn(`[ToolExecutionService] Access Denied: User ${userId} cannot access venue ${requestedVenue}`);
+        if (!allowed) {
+          console.warn(`[ToolExecutionService] Access Denied: User ${userId} cannot access venue ${requestedVenue}`);
         AuditTrail.recordAction({
           conversationId,
           runId: `run_${requestId}`,
@@ -318,6 +322,7 @@ export class ToolExecutionService {
         };
       }
     }
+  }
 
     // 6. RBAC Permission Enforcement (Server Session Context, Never Client Payload)
     const isAuthorized = PermissionService.enforce(

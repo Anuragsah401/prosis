@@ -162,7 +162,7 @@ export class AuthService {
 
     // Default development fallback session if no token provided in development mode
     if (!token) {
-      if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+      if (AUTH_MODE === "development" || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
         return ACTIVE_SESSIONS.get("sess_live_director_token") || null;
       }
       return null;

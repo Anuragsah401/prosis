@@ -62,7 +62,12 @@ export function useVoiceSession(options?: UseVoiceSessionOptions) {
       },
       onError: (err) => {
         setErrorMessage(err);
-        setToolActivity({ status: "error", toolName: "error" });
+        setToolActivity((prev) => {
+          if (prev && prev.status === "running") {
+            return { status: "error", toolName: prev.toolName, requestId: prev.requestId };
+          }
+          return null;
+        });
         optionsRef.current?.onError?.(err);
       },
       onToolCall: (toolName, args, requestId) => {
@@ -73,6 +78,11 @@ export function useVoiceSession(options?: UseVoiceSessionOptions) {
         const isSuccess = result?.success !== false && !result?.error;
         setToolActivity({ status: isSuccess ? "success" : "error", toolName, requestId });
         optionsRef.current?.onToolCallComplete?.(toolName, result, requestId);
+
+        // Auto-dismiss tool activity indicator after 4.5 seconds
+        setTimeout(() => {
+          setToolActivity((prev) => (prev?.requestId === requestId ? null : prev));
+        }, 4500);
       },
     });
 

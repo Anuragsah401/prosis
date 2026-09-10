@@ -359,7 +359,12 @@ export class ProsisGeminiLiveSession {
         // Dispatch through server tool gateway
         const res = await fetch("/api/v1/realtime/tool-call", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-prosis-session": "sess_live_director_token",
+            "x-request-id": requestId,
+            "x-session-id": this.conversationId,
+          },
           body: JSON.stringify({
             toolName,
             arguments: args,
