@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@prosis/sdk": [
+        "./src/packages/sdk"
+      ],
+      "@prosis/tools": [
+        "./src/packages/tools"
+      ],
+      "@prosis/memory": [
+        "./src/packages/memory"
+      ],
+      "@prosis/knowledge": [
+        "./src/packages/knowledge"
+      ],
+      "@prosis/orchestrator": [
+        "./src/packages/orchestrator"
+      ],
+      "@prosis/proactive": [
+        "./src/packages/proactive"
+      ],
+      "@prosis/product-seatbooking": [
+        "./src/packages/products/seatbooking"
+      ],
+      "@prosis/ui": [
+        "./src/packages/ui"
+      ],
+      "@prosis/voice": [
+        "./src/packages/voice"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
