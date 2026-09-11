@@ -244,7 +244,11 @@ export default function ProsisOSPrimaryInterface() {
       </div>
 
       {/* TOP HUD BAR */}
-      <header className="relative z-20 h-20 px-6 sm:px-10 border-b border-white/[0.08] bg-obsidian-950/70 backdrop-blur-2xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <header
+        className={`relative z-20 h-20 pl-6 sm:pl-10 border-b border-white/[0.08] bg-obsidian-950/70 backdrop-blur-2xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ${
+          telemetryOpen ? "pr-6 sm:pr-8 lg:pr-[410px]" : "pr-20 sm:pr-24"
+        }`}
+      >
         {/* Logo & Identity */}
         <div className="flex items-center gap-3.5">
           <div className="relative group">
@@ -753,6 +757,8 @@ export default function ProsisOSPrimaryInterface() {
         onDeleteMemory={handleDeleteMemory}
         isOpen={telemetryOpen}
         onToggle={() => setTelemetryOpen(!telemetryOpen)}
+        currentUser={session?.user}
+        onLogout={handleLogout}
       />
 
       {/* MODAL 3: Dedicated Memory Manager (View, Correct, Disable, Delete) */}

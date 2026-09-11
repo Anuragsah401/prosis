@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Database,
   Cpu,
+  LogOut,
 } from "lucide-react";
 import { MemoryRecord } from "@prosis/memory";
 import { AuditRecord } from "@prosis/orchestrator";
@@ -26,6 +27,12 @@ interface TelemetryDockProps {
   onDeleteMemory: (id: string) => void;
   isOpen: boolean;
   onToggle: () => void;
+  currentUser?: {
+    name: string;
+    role: string;
+    email?: string;
+  } | null;
+  onLogout?: () => void;
 }
 
 export const TelemetryDock: React.FC<TelemetryDockProps> = ({
@@ -35,6 +42,8 @@ export const TelemetryDock: React.FC<TelemetryDockProps> = ({
   onDeleteMemory,
   isOpen,
   onToggle,
+  currentUser,
+  onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<"products" | "memory" | "audit" | "knowledge">("products");
 
@@ -151,9 +160,22 @@ export const TelemetryDock: React.FC<TelemetryDockProps> = ({
             </button>
           </div>
 
-          {/* Bottom pulse beacon */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="relative flex h-2 w-2">
+          {/* Bottom pulse beacon & quick logout */}
+          <div className="flex flex-col items-center gap-3">
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                title="Lock Session / Log Out"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-rose-400/80 hover:bg-rose-500/15 hover:text-rose-300 hover:border hover:border-rose-500/30 transition-all group relative"
+                aria-label="Log Out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="absolute right-12 px-2 py-1 rounded bg-obsidian-900 border border-rose-500/30 text-[10px] font-mono text-rose-300 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 whitespace-nowrap shadow-xl">
+                  Log Out
+                </span>
+              </button>
+            )}
+            <span className="relative flex h-2 w-2" title="System Active">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-core-cyan opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-core-cyan shadow-[0_0_6px_#00f0ff]"></span>
             </span>
@@ -452,6 +474,31 @@ export const TelemetryDock: React.FC<TelemetryDockProps> = ({
               </div>
             )}
           </div>
+
+          {/* Operator Identity & Logout Footer */}
+          {currentUser && (
+            <div className="p-3.5 border-t border-white/10 bg-obsidian-950/90 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-xs font-mono font-bold text-core-cyan shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                  {currentUser.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-gray-200 truncate">{currentUser.name}</div>
+                  <div className="text-[10px] font-mono text-core-cyan/80 truncate uppercase tracking-wider">{currentUser.role}</div>
+                </div>
+              </div>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 hover:border-rose-500/50 text-[11px] font-mono flex items-center gap-1.5 transition-all shrink-0 active:scale-95 shadow-sm"
+                  title="Lock Session / Log Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Lock</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </aside>
