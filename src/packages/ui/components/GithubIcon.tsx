@@ -19,3 +19,4 @@ export function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 // Alias for drop-in compatibility
 export const Github = GithubIcon;
+

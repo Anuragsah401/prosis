@@ -170,6 +170,68 @@ export async function runRepoIntelligenceTests(): Promise<boolean> {
     "Synthesized response accurately grounded in repository knowledge"
   );
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PART 8: REALTIME VOICE REPOSITORY INTELLIGENCE INTEGRATION
+  // ─────────────────────────────────────────────────────────────────────────
+  console.log("\n[Test 8] Voice Assistant Repository Knowledge Integration");
+
+  // 8A. Verify Realtime Session Endpoint dynamic instructions & tools
+  const { POST: realtimeSessionHandler } = await import("../src/app/api/v1/realtime/session/route");
+  const { POST: realtimeToolCallHandler } = await import("../src/app/api/v1/realtime/tool-call/route");
+
+  const prevProvider = process.env.VOICE_PROVIDER;
+  const prevGeminiKey = process.env.GEMINI_API_KEY;
+
+  process.env.VOICE_PROVIDER = "gemini";
+  process.env.GEMINI_API_KEY = "AIzaSyTestSimulatedGeminiKeyForVoiceIntelligence";
+
+  try {
+    const mockSessionReq = new Request("http://localhost:3000/api/v1/realtime/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const sessionRes = await realtimeSessionHandler(mockSessionReq as any);
+    const sessionData = await sessionRes.json();
+
+    assert(sessionRes.ok, "Realtime session endpoint returns 200 OK for voice");
+    assert(sessionData.success === true, "Voice session creation succeeded");
+    assert(typeof sessionData.systemInstruction === "string", "Voice session returned system instructions");
+    assert(sessionData.systemInstruction.includes("Connected GitHub Repositories"), "Voice instructions include Connected GitHub Repositories header");
+    assert(sessionData.systemInstruction.includes("seatbooking-core"), "Voice instructions contain seatbooking-core blueprint");
+    assert(sessionData.systemInstruction.includes("/api/v1/seatbooking/reservations"), "Voice instructions contain seatbooking API endpoints");
+
+    const exposedToolNames = (sessionData.tools || []).map((t: any) => t.name);
+    assert(exposedToolNames.includes("repo_queryRepositoryKnowledge"), "Voice session exposes 'repo_queryRepositoryKnowledge' tool");
+    assert(exposedToolNames.includes("repo_listConnectedRepositories"), "Voice session exposes 'repo_listConnectedRepositories' tool");
+    assert(exposedToolNames.includes("repo_inspectFileOrModule"), "Voice session exposes 'repo_inspectFileOrModule' tool");
+
+    // 8B. Dispatch voice tool call via /api/v1/realtime/tool-call
+    const mockToolCallReq = new Request("http://localhost:3000/api/v1/realtime/tool-call", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-prosis-session": session.sessionToken,
+      },
+      body: JSON.stringify({
+        toolName: "repo_queryRepositoryKnowledge",
+        arguments: { query: "seatbooking deposit policy", repoId: "repo_seatbooking_core" },
+        sessionId: "sess_voice_test",
+        conversationId: "conv_voice_test",
+      }),
+    });
+
+    const toolCallRes = await realtimeToolCallHandler(mockToolCallReq as any);
+    const toolCallData = await toolCallRes.json();
+
+    assert(toolCallRes.ok, "Voice tool-call route returns 200 OK");
+    assert(toolCallData.success === true, "Voice tool call executed successfully");
+    assert(toolCallData.data?.resultsCount > 0, `Voice tool returned ${toolCallData.data?.resultsCount} repository knowledge items`);
+  } finally {
+    process.env.VOICE_PROVIDER = prevProvider;
+    process.env.GEMINI_API_KEY = prevGeminiKey;
+  }
+
   console.log("\n=======================================================");
   console.log(`REPOSITORY INTELLIGENCE VALIDATION: ${passedTests}/${totalTests} TESTS PASSED`);
   console.log("=======================================================\n");

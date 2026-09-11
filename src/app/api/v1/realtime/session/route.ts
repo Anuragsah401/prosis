@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import "@/packages/orchestrator/agent";
 import fs from "fs";
 import path from "path";
+import { GitHubRepositoryEngine } from "@/packages/knowledge";
 
 function resolveOpenAIKey(): string | null {
   const envKey = process.env.OPENAI_API_KEY?.trim();
@@ -75,8 +76,115 @@ Core Identity & Dual-Mode Behavior:
 2. Operational & Business: When the user specifically asks for hospitality metrics, cover pacing, reservations, or venue analytics, utilize the getVenueAnalytics tool. State what you are doing briefly before invoking tools.
 3. Fluid & Cohesive: Fluidly move between casual dialogue and enterprise directives. Maintain a confident, authentic, calm tone with zero robotic stiffness, fake cheerleading, or corporate buzzwords.`;
 
+function getRealtimeToolDeclarations() {
+  return [
+    {
+      name: "getVenueAnalytics",
+      description:
+        "Retrieve real-time booking trajectories, cover pacing, capacity, and revenue deltas across hospitality properties.",
+      parameters: {
+        type: "object",
+        properties: {
+          timeframe: {
+            type: "string",
+            description: "Analysis timeframe, e.g. 'current_week', 'last_week', or 'month'",
+          },
+          venueId: {
+            type: "string",
+            description: "Optional specific venue ID to inspect (e.g. 'cantina_bella', 'verdant_bistro')",
+          },
+        },
+      },
+    },
+    {
+      name: "repo_queryRepositoryKnowledge",
+      description:
+        "Query code, architecture blueprints, endpoints, schemas, and algorithms across connected GitHub repositories (e.g. Seatbooking). Call this whenever the user asks how a repository works, what APIs exist, or asks about repository architecture.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "The search query or concept, e.g. 'reservations endpoint', 'pacing algorithm', 'deposit escrow', 'database models'",
+          },
+          repoId: {
+            type: "string",
+            description: "Optional repository identifier (e.g. 'repo_seatbooking_core')",
+          },
+        },
+        required: ["query"],
+      },
+    },
+    {
+      name: "repo_listConnectedRepositories",
+      description:
+        "Lists all connected GitHub repositories, their tech stack, key capabilities, endpoints count, and indexing status.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+    {
+      name: "repo_inspectFileOrModule",
+      description:
+        "Inspects a specific file or module path within a connected GitHub repository to view its summary and role in the architecture.",
+      parameters: {
+        type: "object",
+        properties: {
+          repoId: {
+            type: "string",
+            description: "Repository ID, e.g. 'repo_seatbooking_core'",
+          },
+          filePath: {
+            type: "string",
+            description: "Relative file path inside the repository, e.g. 'src/server/routes/reservations.ts'",
+          },
+        },
+        required: ["repoId", "filePath"],
+      },
+    },
+  ];
+}
+
+function buildRealtimeSystemInstruction(): string {
+  const repos = GitHubRepositoryEngine.listRepositories();
+  let repoSummary = "";
+  if (repos.length > 0) {
+    repoSummary =
+      "\n\nConnected GitHub Repositories & Ecosystem Knowledge:\n" +
+      repos
+        .map((r) => {
+          const bp = r.blueprint;
+          const endpoints = bp.apiEndpoints.slice(0, 6).map((e) => `${e.method} ${e.path}`).join(", ");
+          const models = bp.domainModels.slice(0, 6).map((m) => m.name).join(", ");
+          return `• Repository "${r.name}" (${r.repoUrl}, branch: ${r.branch}):
+  - Overview: ${bp.overview || r.description}
+  - Tech Stack: ${bp.techStack.join(", ")}
+  - Key Capabilities: ${bp.keyCapabilities.join("; ")}
+  - API Endpoints: ${endpoints || "None"}
+  - Domain Models: ${models || "None"}
+  - Architecture Notes: ${bp.architectureNotes || "N/A"}`;
+        })
+        .join("\n\n");
+  }
+
+  return `${PROSIS_SYSTEM_INSTRUCTION}
+${repoSummary}
+
+4. Codebase & Repository Intelligence:
+You have authoritative, comprehensive knowledge of the connected GitHub repositories listed above.
+- When the user asks questions about connected repositories, codebases, architecture, database schemas, API routes, or algorithms (e.g. "Tell me about the seatbooking repository", "What endpoints does seatbooking have?", "How does table allocation or deposit escrow work?"), speak authoritatively using the repository blueprints above or invoke repo_queryRepositoryKnowledge to retrieve detailed facts.
+- For voice delivery, summarize technical architecture with clarity, brevity, and executive polish. Do not read out raw code blocks; explain the architecture, endpoints, schemas, and operational purpose in spoken natural language.
+- When the user asks to inspect a specific file or module, invoke repo_inspectFileOrModule.
+- When the user asks what repositories are connected, cite them clearly or invoke repo_listConnectedRepositories.`;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const dynamicSystemInstruction = buildRealtimeSystemInstruction();
+    const realtimeTools = getRealtimeToolDeclarations();
+
     // Provider detection
     const voiceProvider = process.env.VOICE_PROVIDER?.trim()?.toLowerCase() || "openai";
 
@@ -103,27 +211,8 @@ export async function POST(req: NextRequest) {
         provider: "gemini",
         geminiApiKey: geminiKey,
         model: geminiModel,
-        systemInstruction: PROSIS_SYSTEM_INSTRUCTION,
-        tools: [
-          {
-            name: "getVenueAnalytics",
-            description:
-              "Retrieve real-time booking trajectories, cover pacing, capacity, and revenue deltas across hospitality properties.",
-            parameters: {
-              type: "object",
-              properties: {
-                timeframe: {
-                  type: "string",
-                  description: "Analysis timeframe, e.g. 'current_week', 'last_week', or 'month'",
-                },
-                venueId: {
-                  type: "string",
-                  description: "Optional specific venue ID to inspect",
-                },
-              },
-            },
-          },
-        ],
+        systemInstruction: dynamicSystemInstruction,
+        tools: realtimeTools,
       });
     }
 
@@ -143,29 +232,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Phase 2: Expose ONLY ONE safe, read-only tool to the Realtime model
-    const tools = [
-      {
-        type: "function",
-        name: "getVenueAnalytics",
-        description:
-          "Retrieve real-time booking trajectories, cover pacing, capacity, and revenue deltas across hospitality properties.",
-        parameters: {
-          type: "object",
-          properties: {
-            timeframe: {
-              type: "string",
-              description: "Analysis timeframe, e.g. 'current_week', 'last_week', or 'month'",
-            },
-            venueId: {
-              type: "string",
-              description: "Optional specific venue ID to inspect (e.g. 'cantina_bella', 'verdant_bistro')",
-            },
-          },
-          required: [],
-        },
-      },
-    ];
+    const openAITools = realtimeTools.map((t) => ({
+      type: "function",
+      ...t,
+    }));
 
     const targetModel = process.env.OPENAI_REALTIME_MODEL?.trim() || "gpt-realtime";
 
@@ -197,8 +267,8 @@ export async function POST(req: NextRequest) {
           model: targetModel,
           voice: "alloy",
           modalities: ["audio", "text"],
-          instructions: PROSIS_SYSTEM_INSTRUCTION,
-          tools,
+          instructions: dynamicSystemInstruction,
+          tools: openAITools,
           tool_choice: "auto",
         }),
       });
@@ -229,6 +299,8 @@ export async function POST(req: NextRequest) {
       client_secret: ephemeralKey,
       expires_at: expiresAt,
       model,
+      systemInstruction: dynamicSystemInstruction,
+      tools: openAITools,
     });
   } catch (err: any) {
     console.error("[RealtimeSessionRoute] Exception:", err);

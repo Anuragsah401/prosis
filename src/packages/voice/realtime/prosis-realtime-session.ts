@@ -134,10 +134,11 @@ export class ProsisRealtimeSession {
         this.audioEl = el;
       }
 
-      // 5. Create Agent with single read-only tool
+      // 5. Create Agent with safe operational and repository intelligence tools
       let lastRequestId: string | undefined;
       const agent = createProsisRealtimeAgent({
         sessionId: this.conversationId,
+        instructions: sessionJson.systemInstruction,
         getEpoch: () => this.toolExecutionEpoch,
         onToolCall: (name, args, reqId) => {
           lastRequestId = reqId;
