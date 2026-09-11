@@ -54,30 +54,33 @@ export const ProductHubModal: React.FC<ProductHubModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-obsidian-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl surface-glass-elevated border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-obsidian-975/85 backdrop-blur-xl animate-fade-in">
+      <div className="relative w-full max-w-4xl surface-hud border border-core-cyan/40 rounded-3xl p-6 sm:p-8 shadow-[0_12px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(0,240,255,0.15)] flex flex-col max-h-[90vh] overflow-hidden">
+        {/* Top Glowing Ambient Ribbon */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-emerald-400 shadow-[0_0_12px_#00f0ff]" />
+
         {/* Header */}
-        <div className="flex items-center justify-between pb-5 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-2xl bg-core-cyan/10 border border-core-cyan/30 flex items-center justify-center text-white shadow-[0_0_12px_rgba(0,240,255,0.2)]">
               <Layers className="w-5 h-5 text-core-cyan" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white tracking-wide">My Products</h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400">
-                  {products.length} Connected
+                <h2 className="text-lg font-bold text-white tracking-wider font-mono">CONSTELLATION REGISTRY</h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 border border-core-cyan/30 text-core-cyan font-semibold">
+                  {products.length} PRODUCTS CONNECTED
                 </span>
               </div>
-              <p className="text-xs text-gray-400">
-                Federated product registry with dynamic capability discovery & dedicated workspaces
+              <p className="text-xs text-gray-400 font-sans mt-0.5">
+                Federated product registry with dynamic capability discovery &amp; dedicated workspaces
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+            className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors border border-transparent hover:border-white/10"
             aria-label="Close Product Hub"
           >
             <X className="w-5 h-5" />
@@ -95,8 +98,8 @@ export const ProductHubModal: React.FC<ProductHubModalProps> = ({
                   key={prod.id}
                   className={`p-5 rounded-2xl border transition-all space-y-4 relative ${
                     isActive
-                      ? "surface-glass-elevated border-core-cyan/50 shadow-[0_0_20px_rgba(56,189,248,0.15)]"
-                      : "surface-glass border-white/10 hover:border-white/20"
+                      ? "surface-hud border-core-cyan shadow-[0_0_25px_rgba(0,240,255,0.25)] bg-core-cyan/[0.03]"
+                      : "surface-hud border-white/10 hover:border-white/20 hover:surface-hud-glow"
                   }`}
                 >
                   {/* Top line */}

@@ -73,51 +73,61 @@ export const CinematicConversation: React.FC<CinematicConversationProps> = ({
         return (
           <article
             key={turn.id || index}
-            className="group relative pl-6 sm:pl-8 border-l border-white/10 hover:border-white/20 transition-colors"
+            className={`group relative transition-all duration-300 ${
+              isProsis
+                ? "surface-hud hover:surface-hud-glow p-5 sm:p-6 rounded-2xl border border-white/10 hover:border-core-cyan/40 shadow-[0_4px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+                : "surface-glass p-4 sm:p-5 rounded-2xl border border-white/10 ml-auto max-w-2xl bg-white/[0.02]"
+            }`}
             aria-label={isProsis ? "Prosis AI Response" : "Operator Input"}
           >
-            {/* Timeline Indicator Dot */}
-            <div
-              className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ring-4 ring-obsidian-950 transition-all ${
-                isProsis
-                  ? "bg-core-cyan shadow-[0_0_8px_rgba(56,189,248,0.5)]"
-                  : "bg-gray-400"
-              }`}
-            />
+            {/* Holographic Header Telemetry */}
+            <header className="flex items-center justify-between gap-3 mb-3 text-xs font-mono">
+              <div className="flex items-center gap-2">
+                {isProsis ? (
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-core-cyan opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-core-cyan shadow-[0_0_8px_#00f0ff]"></span>
+                    </span>
+                    <span className="font-bold tracking-widest text-[11px] bg-gradient-to-r from-core-cyan via-white to-core-violet bg-clip-text text-transparent">
+                      PROSIS.AI // CORE ENGINE
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    <span className="font-semibold tracking-wider text-[11px] uppercase text-gray-300">
+                      OPERATOR // DIRECTIVE
+                    </span>
+                  </div>
+                )}
 
-            {/* Header Telemetry */}
-            <header className="flex items-center gap-3 mb-2.5 text-xs font-mono">
-              <span
-                className={`font-semibold tracking-wider uppercase text-[11px] ${
-                  isProsis ? "text-core-cyan" : "text-gray-300"
-                }`}
-              >
-                {isProsis ? "PROSIS OPERATING SYSTEM" : "OPERATOR"}
-              </span>
+                {turn.activeTool && (
+                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-core-cyan/10 border border-core-cyan/30 text-core-cyan">
+                    {turn.activeTool}
+                  </span>
+                )}
+              </div>
 
-              {turn.activeTool && (
-                <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-[10px]">
-                  {turn.activeTool}
-                </span>
-              )}
-
-              <time className="text-gray-500 text-[11px]">
+              <time className="text-gray-500 text-[10px] font-mono">
                 {new Date(turn.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
+                  second: "2-digit",
                 })}
               </time>
             </header>
 
-            {/* Content Body (Cinematic typography, non-bubble) */}
-            <div className="text-sm sm:text-base leading-relaxed text-gray-200 font-sans space-y-4">
+            {/* Content Body (Cinematic typography) */}
+            <div className="text-sm sm:text-base leading-relaxed text-gray-200 font-sans space-y-3.5 selection:bg-core-cyan/30">
               {turn.content.split("\n\n").map((paragraph, pIdx) => {
                 if (paragraph.startsWith("### ")) {
                   return (
                     <h4
                       key={pIdx}
-                      className="font-semibold text-lg text-gray-100 tracking-tight mt-3 text-white"
+                      className="font-semibold text-lg text-white tracking-tight mt-3 flex items-center gap-2"
                     >
+                      <span className="w-1.5 h-1.5 rounded-full bg-core-cyan shadow-[0_0_6px_#00f0ff]" />
                       {paragraph.replace("### ", "")}
                     </h4>
                   );
@@ -126,14 +136,14 @@ export const CinematicConversation: React.FC<CinematicConversationProps> = ({
                   return (
                     <blockquote
                       key={pIdx}
-                      className="pl-4 py-1.5 border-l-2 border-core-cyan/40 bg-white/[0.02] rounded-r text-gray-300 italic text-sm"
+                      className="pl-4 py-2 border-l-2 border-core-cyan bg-core-cyan/[0.03] rounded-r text-gray-300 italic text-sm"
                     >
                       {paragraph.replace("> ", "")}
                     </blockquote>
                   );
                 }
                 return (
-                  <p key={pIdx} className="whitespace-pre-line text-gray-300 leading-relaxed">
+                  <p key={pIdx} className="whitespace-pre-line text-gray-300 leading-relaxed font-normal">
                     {paragraph}
                   </p>
                 );
@@ -142,31 +152,34 @@ export const CinematicConversation: React.FC<CinematicConversationProps> = ({
 
             {/* Safe Expandable Reasoning Summary */}
             {isProsis && turn.activeTool && (
-              <div className="mt-4 pt-2">
+              <div className="mt-4 pt-3 border-t border-white/5">
                 <button
                   onClick={() => toggleReasoning(turn.id || String(index))}
-                  className="flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-gray-200 transition-colors"
+                  className="flex items-center gap-2 text-xs font-mono text-gray-400 hover:text-core-cyan transition-colors"
                 >
-                  <Cpu className="w-3.5 h-3.5 text-core-cyan/70" />
-                  <span>
-                    {isExpanded ? "Hide Execution Trace" : "View Safe Execution Trace"}
+                  <Cpu className="w-3.5 h-3.5 text-core-cyan" />
+                  <span className="tracking-wider uppercase text-[11px]">
+                    {isExpanded ? "[ HIDE REASONING MATRIX ]" : "[ COGNITIVE TRACE // VIEW MATRIX ]"}
                   </span>
                   {isExpanded ? (
-                    <ChevronUp className="w-3 h-3" />
+                    <ChevronUp className="w-3 h-3 text-core-cyan" />
                   ) : (
-                    <ChevronDown className="w-3 h-3" />
+                    <ChevronDown className="w-3 h-3 text-core-cyan" />
                   )}
                 </button>
 
                 {isExpanded && (
-                  <div className="mt-2.5 p-3.5 rounded-xl bg-obsidian-900 border border-white/10 font-mono text-xs text-gray-400 space-y-1.5">
-                    <div className="flex items-center gap-2 text-core-cyan text-[11px]">
+                  <div className="mt-3 p-4 rounded-xl bg-obsidian-975 border border-core-cyan/20 font-mono text-xs text-gray-300 space-y-2 shadow-inner">
+                    <div className="flex items-center gap-2 text-core-cyan text-[11px] font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>Security Guard: Zero unrestricted SQL / Database access</span>
+                      <span>SECURITY GUARD: ZERO UNRESTRICTED SQL ACCESS</span>
                     </div>
-                    <div>Target Product: <span className="text-gray-300">Seatbooking SaaS</span></div>
-                    <div>Invoked Tool: <span className="text-gray-300">{turn.activeTool}</span></div>
-                    <div>Authorization: <span className="text-emerald-400">Verified (Server-side RBAC)</span></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-gray-400">
+                      <div>TARGET PRODUCT: <span className="text-white font-medium">Seatbooking SaaS</span></div>
+                      <div>INVOKED TOOL: <span className="text-core-cyan font-medium">{turn.activeTool}</span></div>
+                      <div>AUTHORIZATION: <span className="text-emerald-400 font-medium">VERIFIED (Server-side RBAC)</span></div>
+                      <div>TENANT CONTEXT: <span className="text-gray-300 font-medium">Isolated</span></div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -570,13 +583,13 @@ export const CinematicConversation: React.FC<CinematicConversationProps> = ({
 
             {/* Contextual Follow-Up Suggestions */}
             {isProsis && turn.suggestedFollowUps && turn.suggestedFollowUps.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-5">
+              <div className="flex flex-wrap gap-2 mt-5 pt-3 border-t border-white/5">
                 {turn.suggestedFollowUps.map((suggestion, sIdx) => (
                   <button
                     key={sIdx}
                     onClick={() => onSelectFollowUp(suggestion)}
                     disabled={isProcessing}
-                    className="px-3 py-1.5 rounded-full surface-glass hover:bg-white/10 text-xs font-mono text-gray-300 hover:text-white transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-full surface-hud hover:border-core-cyan/60 hover:shadow-[0_0_15px_rgba(0,240,255,0.25)] text-xs font-mono text-gray-300 hover:text-white transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-40 hover:-translate-y-0.5"
                   >
                     <span>{suggestion}</span>
                     <ArrowRight className="w-3 h-3 text-core-cyan" />
@@ -590,9 +603,12 @@ export const CinematicConversation: React.FC<CinematicConversationProps> = ({
 
       {/* Safe Live Execution Telemetry (Non chain-of-thought) */}
       {isProcessing && (
-        <div className="pl-6 sm:pl-8 border-l border-core-cyan/40 animate-pulse flex items-center gap-3 py-2">
-          <div className="w-2 h-2 rounded-full bg-core-cyan" />
-          <span className="text-xs font-mono text-core-cyan tracking-wide">
+        <div className="surface-hud p-4 rounded-2xl border border-core-cyan/30 flex items-center gap-3 py-3 shadow-[0_0_20px_rgba(0,240,255,0.15)] animate-pulse">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-core-cyan opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-core-cyan shadow-[0_0_8px_#00f0ff]"></span>
+          </span>
+          <span className="text-xs font-mono text-core-cyan tracking-wider font-semibold uppercase">
             {activeExecutionStatus}
           </span>
         </div>

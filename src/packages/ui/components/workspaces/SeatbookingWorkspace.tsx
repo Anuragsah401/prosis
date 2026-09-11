@@ -37,19 +37,19 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-fade-in text-gray-100 pb-16">
       {/* Workspace Header & Product Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 surface-glass rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 surface-hud rounded-2xl border border-core-cyan/30 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-core-cyan/10 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+          <div className="w-10 h-10 rounded-xl bg-core-cyan/10 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_15px_rgba(0,240,255,0.3)]">
             <UtensilsCrossed className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-white tracking-wide">Seatbooking Workspace</h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 border border-core-cyan/30 text-core-cyan font-medium">
-                v2.4.0 Active
+              <h2 className="text-base font-bold text-white tracking-wide font-mono">SEATBOOKING WORKSPACE</h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 border border-core-cyan/30 text-core-cyan font-semibold">
+                v2.4.0 ACTIVE
               </span>
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 font-sans">
               Hospitality reservation engine · 5 linked dining venues
             </p>
           </div>
@@ -58,14 +58,14 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onSendDirective("Show today's reservations for Cantina Bella")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl surface-glass hover:bg-white/10 text-xs font-mono text-gray-300 hover:text-white transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl surface-hud hover:border-core-cyan/50 text-xs font-mono text-gray-300 hover:text-white transition-all shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-core-cyan" />
-            <span>AI Query</span>
+            <span>AI Directive</span>
           </button>
           <button
             onClick={onReturnToCore}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono text-white transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-core-cyan to-blue-500 text-xs font-mono font-bold text-obsidian-950 transition-all hover:brightness-110 shadow-[0_0_15px_rgba(0,240,255,0.25)] active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Prosis Core</span>
@@ -74,12 +74,12 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
       </div>
 
       {/* Product Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1">
+      <div className="flex items-center gap-2 border-b border-white/10 pb-1">
         <button
           onClick={() => setActiveTab("reservations")}
-          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-colors ${
+          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-all ${
             activeTab === "reservations"
-              ? "text-core-cyan border-b-2 border-core-cyan font-medium bg-white/[0.02]"
+              ? "text-core-cyan border-b-2 border-core-cyan font-bold bg-core-cyan/[0.05] shadow-[0_0_12px_rgba(0,240,255,0.1)]"
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
@@ -87,9 +87,9 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("restaurants")}
-          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-colors ${
+          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-all ${
             activeTab === "restaurants"
-              ? "text-core-cyan border-b-2 border-core-cyan font-medium bg-white/[0.02]"
+              ? "text-core-cyan border-b-2 border-core-cyan font-bold bg-core-cyan/[0.05] shadow-[0_0_12px_rgba(0,240,255,0.1)]"
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
@@ -97,9 +97,9 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("analytics")}
-          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-colors ${
+          className={`px-4 py-2 text-xs font-mono rounded-t-lg transition-all ${
             activeTab === "analytics"
-              ? "text-core-cyan border-b-2 border-core-cyan font-medium bg-white/[0.02]"
+              ? "text-core-cyan border-b-2 border-core-cyan font-bold bg-core-cyan/[0.05] shadow-[0_0_12px_rgba(0,240,255,0.1)]"
               : "text-gray-400 hover:text-gray-200"
           }`}
         >
@@ -109,21 +109,21 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
 
       {/* KPI Stats Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 surface-glass rounded-xl space-y-1">
-          <div className="text-[11px] font-mono text-gray-400">TODAY'S COVERS</div>
-          <div className="text-xl font-bold text-white font-mono">395 <span className="text-xs text-core-cyan font-normal">guests</span></div>
+        <div className="p-4 surface-hud rounded-2xl space-y-1 border border-white/10 hover:border-core-cyan/30 transition-all">
+          <div className="text-[11px] font-mono text-gray-400 uppercase tracking-wider">TODAY&apos;S COVERS</div>
+          <div className="text-2xl font-bold text-white font-mono">395 <span className="text-xs text-core-cyan font-normal">guests</span></div>
         </div>
-        <div className="p-4 surface-glass rounded-xl space-y-1">
-          <div className="text-[11px] font-mono text-gray-400">PORTFOLIO OCCUPANCY</div>
-          <div className="text-xl font-bold text-emerald-400 font-mono">88.4%</div>
+        <div className="p-4 surface-hud rounded-2xl space-y-1 border border-white/10 hover:border-emerald-500/30 transition-all">
+          <div className="text-[11px] font-mono text-gray-400 uppercase tracking-wider">PORTFOLIO OCCUPANCY</div>
+          <div className="text-2xl font-bold text-emerald-400 font-mono">88.4%</div>
         </div>
-        <div className="p-4 surface-glass rounded-xl space-y-1">
-          <div className="text-[11px] font-mono text-gray-400">PACED REVENUE</div>
-          <div className="text-xl font-bold text-white font-mono">$14,850</div>
+        <div className="p-4 surface-hud rounded-2xl space-y-1 border border-white/10 hover:border-core-cyan/30 transition-all">
+          <div className="text-[11px] font-mono text-gray-400 uppercase tracking-wider">PACED REVENUE</div>
+          <div className="text-2xl font-bold text-white font-mono">$14,850</div>
         </div>
-        <div className="p-4 surface-glass rounded-xl space-y-1">
-          <div className="text-[11px] font-mono text-gray-400">AVG CANCELLATION</div>
-          <div className="text-xl font-bold text-amber-400 font-mono">11.8%</div>
+        <div className="p-4 surface-hud rounded-2xl space-y-1 border border-white/10 hover:border-amber-400/30 transition-all">
+          <div className="text-[11px] font-mono text-gray-400 uppercase tracking-wider">AVG CANCELLATION</div>
+          <div className="text-2xl font-bold text-amber-400 font-mono">11.8%</div>
         </div>
       </div>
 
@@ -159,40 +159,40 @@ export const SeatbookingWorkspace: React.FC<SeatbookingWorkspaceProps> = ({
           </div>
 
           {/* Table */}
-          <div className="surface-glass rounded-2xl border border-white/10 overflow-hidden">
+          <div className="surface-hud rounded-2xl border border-white/10 hover:border-core-cyan/30 transition-all overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <table className="w-full text-left text-xs">
-              <thead className="bg-white/[0.03] text-gray-400 font-mono border-b border-white/[0.08]">
+              <thead className="bg-obsidian-975/90 text-gray-400 font-mono border-b border-white/10">
                 <tr>
-                  <th className="p-3.5">ID</th>
-                  <th className="p-3.5">Guest</th>
-                  <th className="p-3.5">Restaurant</th>
-                  <th className="p-3.5">Party</th>
-                  <th className="p-3.5">Time</th>
-                  <th className="p-3.5">Table</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5 text-right">Actions</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">ID</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Guest</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Restaurant</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Party</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Time</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Table</th>
+                  <th className="p-3.5 tracking-wider uppercase text-[10px]">Status</th>
+                  <th className="p-3.5 text-right tracking-wider uppercase text-[10px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-white/5 font-sans">
                 {filteredReservations.map((res) => (
-                  <tr key={res.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="p-3.5 font-mono text-gray-400">{res.id}</td>
+                  <tr key={res.id} className="hover:bg-core-cyan/[0.02] transition-colors group">
+                    <td className="p-3.5 font-mono text-gray-500 group-hover:text-core-cyan transition-colors">{res.id}</td>
                     <td className="p-3.5 font-medium text-white">
                       {res.customerName}
-                      {res.notes && <p className="text-[10px] text-gray-400">{res.notes}</p>}
+                      {res.notes && <p className="text-[10px] text-gray-400 font-normal">{res.notes}</p>}
                     </td>
                     <td className="p-3.5 text-gray-300">{res.restaurantName}</td>
-                    <td className="p-3.5 font-mono">{res.partySize} guests</td>
-                    <td className="p-3.5 font-mono text-gray-300">{res.timeSlot}</td>
+                    <td className="p-3.5 font-mono text-gray-300">{res.partySize} guests</td>
+                    <td className="p-3.5 font-mono text-core-cyan">{res.timeSlot}</td>
                     <td className="p-3.5 font-mono text-gray-400">T-{res.partySize * 2}</td>
                     <td className="p-3.5">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider ${
                           res.status === "confirmed"
-                            ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                            ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
                             : res.status === "seated"
-                            ? "bg-core-cyan/10 text-core-cyan border border-core-cyan/20"
-                            : "bg-gray-500/10 text-gray-400"
+                            ? "bg-core-cyan/15 text-core-cyan border border-core-cyan/30"
+                            : "bg-gray-500/10 text-gray-400 border border-white/10"
                         }`}
                       >
                         {res.status.toUpperCase()}

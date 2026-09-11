@@ -82,26 +82,26 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className="my-5 rounded-3xl bg-white border border-black/[0.08] p-5 shadow-command-card relative overflow-hidden text-charcoal-900 animate-fade-in">
+    <div className="my-5 rounded-3xl surface-hud p-5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] relative overflow-hidden text-gray-200 border border-core-cyan/30 animate-fade-in backdrop-blur-xl">
       {/* Top Ambient Ribbon */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-emerald-400 shadow-[0_0_10px_#00f0ff]" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4 pb-3 border-b border-black/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4 pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600">
+          <div className="p-2 rounded-xl bg-core-cyan/10 border border-core-cyan/30 text-core-cyan shadow-[0_0_10px_rgba(0,240,255,0.2)]">
             <BarChart3 className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-cyan-700">
+              <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-core-cyan">
                 DYNAMIC ANALYTICS SURFACE
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-mono bg-bone-100 text-charcoal-600">
+              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-mono bg-white/5 border border-white/10 text-gray-400">
                 Live Portfolio Telemetry
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-charcoal-900 mt-0.5">
+            <h3 className="text-sm font-semibold text-white mt-0.5">
               Portfolio Performance & Capacity Pacing
             </h3>
           </div>
@@ -112,10 +112,10 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
             <button
               onClick={() => onSelectAction("Compare these two")}
               disabled={disabled}
-              className="px-3 py-1.5 rounded-xl text-xs font-medium text-charcoal-700 bg-bone-100 hover:bg-bone-200 border border-black/10 transition-all flex items-center gap-1 active:scale-95"
+              className="px-3 py-1.5 rounded-xl text-xs font-mono text-gray-300 bg-white/5 hover:bg-core-cyan/15 hover:text-white border border-white/10 hover:border-core-cyan/40 transition-all flex items-center gap-1 active:scale-95 shadow-sm"
             >
               <span>Compare Venues</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3 h-3 text-core-cyan" />
             </button>
           )}
         </div>
@@ -128,36 +128,36 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
           return (
             <div
               key={v.id}
-              className="p-3 rounded-2xl bg-bone-50/60 border border-black/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+              className="p-3.5 rounded-2xl bg-obsidian-975/80 border border-white/5 hover:border-white/15 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
             >
               <div className="min-w-[180px]">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-charcoal-900 text-[13px]">
+                  <span className="font-semibold text-white text-[13px]">
                     {v.name}
                   </span>
                   {isDeclining && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-rose-50 text-rose-700 border border-rose-200 font-semibold">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-rose-500/15 text-rose-400 border border-rose-500/30 font-semibold tracking-wider">
                       ATTENTION
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] text-charcoal-400 font-sans">
+                <span className="text-[11px] text-gray-400 font-sans">
                   {v.cuisine}
                 </span>
               </div>
 
               {/* Progress Bar */}
               <div className="flex-1 max-w-xs">
-                <div className="flex items-center justify-between text-[10.5px] text-charcoal-500 font-mono mb-1">
-                  <span>Capacity</span>
-                  <span className="font-semibold text-charcoal-800">
+                <div className="flex items-center justify-between text-[10.5px] text-gray-400 font-mono mb-1">
+                  <span>Capacity Paced</span>
+                  <span className="font-semibold text-white">
                     {v.capacityPercent}%
                   </span>
                 </div>
-                <div className="w-full bg-bone-200/80 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isDeclining ? "bg-amber-500" : "bg-emerald-500"
+                    className={`h-full rounded-full transition-all duration-500 shadow-[0_0_8px_currentColor] ${
+                      isDeclining ? "bg-amber-400 text-amber-400" : "bg-emerald-400 text-emerald-400"
                     }`}
                     style={{ width: `${v.capacityPercent}%` }}
                   />
@@ -169,7 +169,7 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
                 <div className="min-w-[70px]">
                   <div
                     className={`font-mono text-xs font-bold flex items-center justify-end gap-0.5 ${
-                      isDeclining ? "text-rose-600" : "text-emerald-600"
+                      isDeclining ? "text-rose-400" : "text-emerald-400"
                     }`}
                   >
                     {isDeclining ? (
@@ -179,16 +179,16 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
                     )}
                     <span>{v.weeklyTrendPercent > 0 ? `+${v.weeklyTrendPercent}%` : `${v.weeklyTrendPercent}%`}</span>
                   </div>
-                  <span className="text-[10px] text-charcoal-400 font-mono">
+                  <span className="text-[10px] text-gray-500 font-mono">
                     vs Last Week
                   </span>
                 </div>
 
                 <div className="min-w-[80px]">
-                  <span className="font-mono text-xs font-semibold text-charcoal-900">
+                  <span className="font-mono text-xs font-semibold text-white">
                     ${v.projectedRevenue.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-charcoal-400 block font-mono">
+                  <span className="text-[10px] text-gray-500 block font-mono">
                     Projected
                   </span>
                 </div>
@@ -200,23 +200,23 @@ export const AnalyticsSurfaceCard: React.FC<AnalyticsSurfaceCardProps> = ({
 
       {/* Surface Action Shortcuts */}
       {onSelectAction && (
-        <div className="pt-3 border-t border-black/[0.06] flex flex-wrap gap-2 text-xs">
-          <span className="text-[11px] font-mono text-charcoal-400 self-center mr-1">
+        <div className="pt-3 border-t border-white/10 flex flex-wrap gap-2 text-xs">
+          <span className="text-[11px] font-mono text-gray-400 self-center mr-1">
             Contextual actions:
           </span>
           <button
             onClick={() => onSelectAction("Compare these two")}
-            className="px-3 py-1.5 rounded-xl bg-bone-100 hover:bg-bone-200 text-charcoal-800 font-medium transition-all active:scale-95 flex items-center gap-1"
+            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-core-cyan/15 border border-white/10 hover:border-core-cyan/40 text-gray-200 hover:text-white font-mono transition-all active:scale-95 flex items-center gap-1.5"
           >
             <span>Compare Cantina Bella & Verdant Bistro</span>
-            <ArrowRight className="w-3 h-3 text-cyan-600" />
+            <ArrowRight className="w-3 h-3 text-core-cyan" />
           </button>
           <button
             onClick={() => onSelectAction("Email the owner")}
-            className="px-3 py-1.5 rounded-xl bg-bone-100 hover:bg-bone-200 text-charcoal-800 font-medium transition-all active:scale-95 flex items-center gap-1"
+            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-core-violet/20 border border-white/10 hover:border-core-violet/40 text-gray-200 hover:text-white font-mono transition-all active:scale-95 flex items-center gap-1.5"
           >
             <span>Email the owner</span>
-            <ArrowRight className="w-3 h-3 text-indigo-600" />
+            <ArrowRight className="w-3 h-3 text-core-violet" />
           </button>
         </div>
       )}

@@ -164,53 +164,58 @@ export default function ProsisOSPrimaryInterface() {
   const hasTurns = turns.length > 0;
 
   return (
-    <div className="min-h-screen bg-obsidian-950 text-gray-100 flex flex-col relative selection:bg-core-cyan/30 selection:text-white">
-      {/* Background Subtle Gradient Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-core-cyan/[0.04] blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 left-1/3 w-[600px] h-[300px] bg-core-violet/[0.03] blur-[100px] rounded-full" />
+    <div className="min-h-screen bg-obsidian-975 text-gray-100 flex flex-col relative selection:bg-core-cyan/30 selection:text-white cyber-grid-bg">
+      {/* Background Subtle Gradient Atmosphere & Sci-Fi Auroras */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-core-cyan/[0.07] via-core-violet/[0.04] to-transparent blur-[140px] rounded-full" />
+        <div className="absolute -bottom-20 left-1/4 w-[700px] h-[350px] bg-core-violet/[0.04] blur-[120px] rounded-full" />
+        <div className="absolute top-1/3 right-10 w-[400px] h-[300px] bg-core-emerald/[0.02] blur-[100px] rounded-full" />
       </div>
 
-      {/* TOP BAR */}
-      <header className="relative z-20 h-18 px-6 sm:px-10 border-b border-white/[0.06] backdrop-blur-xl flex items-center justify-between">
+      {/* TOP HUD BAR */}
+      <header className="relative z-20 h-20 px-6 sm:px-10 border-b border-white/[0.08] bg-obsidian-950/70 backdrop-blur-2xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         {/* Logo & Identity */}
         <div className="flex items-center gap-3.5">
-          <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-white font-mono font-bold text-sm shadow-sm">
-            P
+          <div className="relative group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 via-obsidian-900 to-core-violet/20 border border-core-cyan/40 flex items-center justify-center text-core-cyan font-mono font-bold text-sm shadow-[0_0_20px_rgba(56,189,248,0.25)] group-hover:border-core-cyan transition-all">
+              P
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-core-cyan shadow-[0_0_6px_#38bdf8]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-wider font-mono text-gray-100">
+              <span className="font-bold text-sm tracking-wider font-mono text-white flex items-center gap-1.5">
                 PROSIS
+                <span className="text-core-cyan font-light">IT</span>
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 text-gray-400 border border-white/5 font-semibold">
-                OS
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 text-core-cyan border border-core-cyan/30 font-semibold tracking-wide">
+                SYS.v2.4
               </span>
             </div>
             <p className="text-[10px] text-gray-400 font-mono tracking-tight hidden sm:block">
-              Enterprise Intelligence Operating System
+              Hospitality Executive Intelligence OS
             </p>
           </div>
         </div>
 
         {/* Connection Status & Active Workspace */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full surface-glass text-xs font-mono text-gray-300">
+        <div className="flex items-center gap-2 sm:gap-3.5">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud text-xs font-mono text-gray-300 border-white/10 shadow-sm">
             <span
               className={`w-2 h-2 rounded-full ${
                 currentWorkspace === "prosis"
-                  ? "bg-core-cyan shadow-[0_0_8px_#38bdf8]"
-                  : "bg-core-emerald shadow-[0_0_8px_#34d399]"
+                  ? "bg-core-cyan shadow-[0_0_10px_#38bdf8] animate-pulse"
+                  : "bg-core-emerald shadow-[0_0_10px_#34d399] animate-pulse"
               }`}
             />
-            <span className="hidden sm:inline">Active ·</span>
-            <span className="text-white font-medium capitalize">
+            <span className="hidden sm:inline text-gray-400 text-[11px] tracking-wider">ORBIT ·</span>
+            <span className="text-white font-medium capitalize text-xs">
               {currentWorkspace === "prosis" ? "Prosis OS Core" : `${currentWorkspace} Workspace`}
             </span>
             {currentWorkspace !== "prosis" && (
               <button
                 onClick={() => setCurrentWorkspace("prosis")}
-                className="ml-1 text-[10px] text-core-cyan hover:underline"
+                className="ml-1 text-[10px] text-core-cyan hover:underline font-mono"
               >
                 (Return)
               </button>
@@ -220,27 +225,27 @@ export default function ProsisOSPrimaryInterface() {
           {/* Product Hub Button ("My Products") */}
           <button
             onClick={() => setProductHubOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-glass hover:bg-white/10 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-core-cyan/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
             aria-label="Open Product Hub"
           >
-            <Layers className="w-3.5 h-3.5 text-core-cyan" />
-            <span className="hidden sm:inline">My Products ({products.length})</span>
+            <Layers className="w-3.5 h-3.5 text-core-cyan group-hover:drop-shadow-[0_0_6px_#38bdf8] transition-all" />
+            <span className="hidden sm:inline">Products ({products.length})</span>
           </button>
 
           {/* Memory Intelligence Manager Button */}
           <button
             onClick={() => setMemoryModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-glass hover:bg-white/10 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-purple-400/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
             aria-label="Open Memory Manager"
           >
-            <Brain className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Memory ({memories.length})</span>
+            <Brain className="w-3.5 h-3.5 text-core-violet group-hover:drop-shadow-[0_0_6px_#818cf8] transition-all" />
+            <span className="hidden sm:inline">Matrix ({memories.length})</span>
           </button>
 
           {/* Telemetry / Profile Settings */}
           <button
             onClick={() => setTelemetryOpen(!telemetryOpen)}
-            className="p-2 rounded-full surface-glass hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+            className="p-2.5 rounded-full surface-hud hover:border-white/20 text-gray-400 hover:text-white transition-all"
             aria-label="Toggle Telemetry & Memory Dock"
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -348,31 +353,68 @@ export default function ProsisOSPrimaryInterface() {
               }`}
               aria-label="AI Core Status"
             >
-              <AICoreVisual
-                state={voice.voiceState}
-                audioLevel={voice.amplitude}
-                size={hasTurns ? 200 : 280}
-                onClick={() => {
-                  voice.toggleVoice();
-                }}
-              />
+              {/* Futuristic Cyber Orbit Enclosure */}
+              <div className="relative flex items-center justify-center my-2">
+                {/* Orbital Ring 1 (Dashed Cyan with satellite nodes) */}
+                <div
+                  className={`absolute rounded-full border border-core-cyan/25 animate-orbit pointer-events-none transition-all duration-700 ${
+                    hasTurns ? "w-[240px] h-[240px]" : "w-[340px] h-[340px]"
+                  }`}
+                  style={{
+                    borderStyle: "dashed",
+                    borderWidth: "1px",
+                  }}
+                >
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-core-cyan shadow-[0_0_10px_#38bdf8]" />
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-core-violet shadow-[0_0_8px_#818cf8]" />
+                </div>
+
+                {/* Orbital Ring 2 (Outer reverse rotation with emerald node) */}
+                <div
+                  className={`absolute rounded-full border border-white/[0.07] animate-orbit-reverse pointer-events-none transition-all duration-700 ${
+                    hasTurns ? "w-[280px] h-[280px]" : "w-[390px] h-[390px]"
+                  }`}
+                >
+                  <span className="absolute top-1/2 -left-1 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-core-emerald shadow-[0_0_8px_#34d399]" />
+                </div>
+
+                {/* Radar Ambient Pulse Ring */}
+                <div
+                  className={`absolute rounded-full bg-core-cyan/[0.02] border border-core-cyan/10 animate-radar-ping pointer-events-none ${
+                    hasTurns ? "w-[210px] h-[210px]" : "w-[300px] h-[300px]"
+                  }`}
+                />
+
+                <AICoreVisual
+                  state={voice.voiceState}
+                  audioLevel={voice.amplitude}
+                  size={hasTurns ? 200 : 280}
+                  onClick={() => {
+                    voice.toggleVoice();
+                  }}
+                />
+              </div>
 
               {/* Contextual Greeting & Operating State */}
-              <div className="text-center mt-4 max-w-lg space-y-2">
-                <h1 className="text-lg sm:text-xl font-medium tracking-tight text-gray-100 font-sans">
+              <div className="text-center mt-6 max-w-lg space-y-2 relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md text-[10px] font-mono text-gray-400 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-core-cyan animate-ping" />
+                  <span className="tracking-widest uppercase text-gray-300">CORE INTELLIGENCE // v2.4</span>
+                </div>
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white font-sans">
                   {getGreeting()}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed font-sans">
-                  Prosis is orchestrating {products.length} registered products. Speak naturally or select a directive below.
+                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed font-sans max-w-md mx-auto">
+                  Prosis is orchestrating <span className="text-core-cyan font-mono">{products.length} registered products</span>. Speak naturally or select an executive directive below.
                 </p>
               </div>
 
               {/* Real-time Voice Acoustic Feedback Banner */}
-              <div className="mt-4 flex flex-col items-center gap-2">
+              <div className="mt-4 flex flex-col items-center gap-2 relative z-10">
                 {voice.voiceState === "connecting" && (
-                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-glass border border-core-cyan/30 text-xs font-mono text-core-cyan animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-core-cyan" />
-                    <span>Connecting Realtime Session...</span>
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full surface-hud-glow text-xs font-mono text-core-cyan animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-core-cyan animate-ping" />
+                    <span>Connecting Quantum Channel...</span>
                   </div>
                 )}
 
@@ -394,9 +436,9 @@ export default function ProsisOSPrimaryInterface() {
                   />
                 )}
 
-                {/* Section 12: Realtime Tool Activity Indicator */}
+                {/* Realtime Tool Activity Indicator */}
                 {voice.toolActivity && (
-                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-glass border border-white/10 text-xs font-mono animate-fade-in">
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full surface-hud border-core-cyan/30 text-xs font-mono animate-fade-in shadow-[0_0_15px_rgba(56,189,248,0.2)]">
                     {voice.toolActivity.status === "running" && (
                       <>
                         <span className="w-2 h-2 rounded-full bg-core-cyan animate-pulse" />
@@ -419,10 +461,10 @@ export default function ProsisOSPrimaryInterface() {
                 )}
               </div>
 
-              {/* Section 4: Explicit AI Readiness / Configuration Error Notification */}
+              {/* Explicit AI Readiness / Configuration Error Notification */}
               {(voice.voiceState === "CONFIGURATION_ERROR" ||
                 voice.voiceState === "AI_UNAVAILABLE") && (
-                <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-mono flex items-center gap-3 max-w-md text-left">
+                <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-mono flex items-center gap-3 max-w-md text-left backdrop-blur-md shadow-[0_0_20px_rgba(239,68,68,0.15)]">
                   <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                   <div>
                     <span className="font-semibold block text-red-200">Realtime AI Not Configured</span>
@@ -437,62 +479,62 @@ export default function ProsisOSPrimaryInterface() {
               {voice.errorMessage &&
                 voice.voiceState !== "CONFIGURATION_ERROR" &&
                 voice.voiceState !== "AI_UNAVAILABLE" && (
-                  <div className="mt-3 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-mono flex items-center gap-2">
+                  <div className="mt-3 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-mono flex items-center gap-2 backdrop-blur-md">
                     <AlertCircle className="w-3.5 h-3.5" />
                     <span>{voice.errorMessage}</span>
                   </div>
                 )}
             </section>
 
-            {/* DEFAULT INITIAL STATE: Clean Minimal Directives (Secondary areas hidden) */}
+            {/* DEFAULT INITIAL STATE: Futuristic Holographic Directives */}
             {!hasTurns ? (
-              <div className="w-full max-w-2xl space-y-3 mt-4 animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <div className="w-full max-w-2xl space-y-3 mt-4 animate-fade-in relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-left">
                   <button
                     onClick={() => sendDirective("Prosis, what's happening today?", "web")}
-                    className="surface-glass hover:bg-white/[0.06] p-4 rounded-2xl transition-all space-y-2 group active:scale-95"
+                    className="surface-hud hover:surface-hud-glow p-4 rounded-2xl transition-all space-y-2.5 group active:scale-95 text-left hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between text-[11px] font-mono text-core-cyan">
-                      <span>DAILY BRIEFING</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-core-cyan">
+                      <span className="tracking-widest uppercase font-semibold">// BRIEFING</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 text-core-cyan transition-transform" />
                     </div>
-                    <div className="text-sm font-medium text-gray-200">
+                    <div className="text-sm font-medium text-gray-100 group-hover:text-white transition-colors">
                       &ldquo;What&apos;s happening today?&rdquo;
                     </div>
-                    <p className="text-xs text-gray-400">
-                      Gathers covers, occupancy, and pacing across portfolio.
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Covers, occupancy, and pacing telemetry across portfolio.
                     </p>
                   </button>
 
                   <button
                     onClick={() => sendDirective("Find restaurants with increasing bookings but insufficient staff", "web")}
-                    className="surface-glass hover:bg-white/[0.06] p-4 rounded-2xl transition-all space-y-2 group active:scale-95"
+                    className="surface-hud hover:surface-hud-glow p-4 rounded-2xl transition-all space-y-2.5 group active:scale-95 text-left hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between text-[11px] font-mono text-core-amber">
-                      <span>CROSS-PRODUCT AI</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-core-amber">
+                      <span className="tracking-widest uppercase font-semibold">// CORRELATION</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 text-core-amber transition-transform" />
                     </div>
-                    <div className="text-sm font-medium text-gray-200">
+                    <div className="text-sm font-medium text-gray-100 group-hover:text-white transition-colors">
                       &ldquo;Correlate bookings & staff&rdquo;
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-400 leading-relaxed">
                       Cross-checks Seatbooking pacing against Workforce rosters.
                     </p>
                   </button>
 
                   <button
                     onClick={() => sendDirective("Open Seatbooking", "web")}
-                    className="surface-glass hover:bg-white/[0.06] p-4 rounded-2xl transition-all space-y-2 group active:scale-95"
+                    className="surface-hud hover:surface-hud-glow p-4 rounded-2xl transition-all space-y-2.5 group active:scale-95 text-left hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between text-[11px] font-mono text-core-violet">
-                      <span>WORKSPACE SWITCH</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center justify-between text-[10px] font-mono text-core-violet">
+                      <span className="tracking-widest uppercase font-semibold">// WORKSPACE</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 text-core-violet transition-transform" />
                     </div>
-                    <div className="text-sm font-medium text-gray-200">
+                    <div className="text-sm font-medium text-gray-100 group-hover:text-white transition-colors">
                       &ldquo;Open Seatbooking&rdquo;
                     </div>
-                    <p className="text-xs text-gray-400">
-                      Switches workspace to reservations & capacity view.
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Direct view into reservation pacing & capacity matrices.
                     </p>
                   </button>
                 </div>
@@ -514,11 +556,11 @@ export default function ProsisOSPrimaryInterface() {
 
       {/* FLOATING COMMAND OMNIBAR */}
       <div className="fixed bottom-6 inset-x-0 z-30 pointer-events-auto px-4">
-        <div className="max-w-2xl mx-auto surface-glass-elevated rounded-full p-2 pl-3 shadow-2xl flex items-center justify-between gap-3">
+        <div className="max-w-2xl mx-auto surface-glass-elevated border border-white/10 hover:border-core-cyan/30 rounded-full p-2 pl-3 shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(0,240,255,0.06)] flex items-center justify-between gap-3 backdrop-blur-2xl transition-all duration-300">
           {/* Attachment Icon */}
           <button
             onClick={() => {}}
-            className="p-2 rounded-full text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-colors"
+            className="p-2 rounded-full text-gray-400 hover:text-core-cyan hover:bg-white/5 transition-all"
             title="Attach documentation or knowledge file"
             aria-label="Attach File"
           >
@@ -535,11 +577,14 @@ export default function ProsisOSPrimaryInterface() {
               type="text"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
-              placeholder="Direct Prosis or speak naturally (⌘K)..."
+              placeholder="Direct Prosis or speak naturally..."
               disabled={isProcessing}
-              className="w-full bg-transparent text-xs sm:text-sm text-gray-100 placeholder-gray-500 focus:outline-none px-2 font-sans"
+              className="w-full bg-transparent text-xs sm:text-sm text-gray-100 placeholder-gray-500 focus:outline-none px-2 font-sans selection:bg-core-cyan/30"
               aria-label="Direct Prosis"
             />
+            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-500 border border-white/10 bg-white/[0.02]">
+              ⌘K
+            </span>
           </form>
 
           {/* Real-time Voice Duplex Interaction (Microphone with amplitude ring & barge-in) */}
@@ -548,21 +593,24 @@ export default function ProsisOSPrimaryInterface() {
               onClick={() => voice.toggleVoice()}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-all ${
                 voice.isVoiceActive
-                  ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/40 shadow-[0_0_15px_rgba(56,189,248,0.25)]"
-                  : "surface-glass text-gray-400 hover:text-gray-200 border-white/10"
+                  ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/50 shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+                  : "surface-glass text-gray-400 hover:text-gray-200 border-white/10 hover:border-white/20"
               }`}
               title={voice.isVoiceActive ? "Stop Voice Duplex" : "Start Voice Duplex"}
               aria-label={voice.isVoiceActive ? "Stop Voice Stream" : "Start Voice Stream"}
             >
               {voice.isVoiceActive ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-core-cyan animate-ping" />
-                  <span>Live</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-core-cyan opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-core-cyan"></span>
+                  </span>
+                  <span className="tracking-wide">LIVE</span>
                 </>
               ) : (
                 <>
                   <Mic className="w-3.5 h-3.5" />
-                  <span>Voice</span>
+                  <span className="tracking-wide">VOICE</span>
                 </>
               )}
             </button>
@@ -576,7 +624,7 @@ export default function ProsisOSPrimaryInterface() {
                 sendDirective(text, "web");
               }}
               disabled={!commandInput.trim() || isProcessing}
-              className="p-2.5 rounded-full bg-white text-obsidian-950 font-medium hover:bg-gray-200 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
+              className="p-2.5 rounded-full bg-gradient-to-r from-core-cyan to-blue-500 text-obsidian-950 font-bold hover:brightness-110 disabled:opacity-25 disabled:pointer-events-none transition-all active:scale-95 shadow-[0_0_15px_rgba(0,240,255,0.3)]"
               aria-label="Dispatch Directive"
             >
               <Send className="w-3.5 h-3.5" />
