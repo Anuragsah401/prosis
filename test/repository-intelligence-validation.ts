@@ -76,6 +76,18 @@ export async function runRepoIntelligenceTests(): Promise<boolean> {
   assert(newRepo.name === "prosis", "Connected new repository 'prosis'");
   assert(newRepo.status === "ready", "New repository transitioned to ready state");
   assert(newRepo.fileTree.length > 0, `File tree captured ${newRepo.fileTree.length} nodes`);
+  assert(
+    newRepo.blueprint.techStack.some((t) => t.includes("Next.js") || t.includes("TypeScript")),
+    `Real tech stack extracted dynamically (${newRepo.blueprint.techStack.slice(0, 3).join(", ")})`
+  );
+  assert(
+    newRepo.blueprint.apiEndpoints.length > 0,
+    `Discovered ${newRepo.blueprint.apiEndpoints.length} real API endpoints in codebase`
+  );
+  assert(
+    newRepo.blueprint.overview.length > 15,
+    `Synthesized genuine overview from codebase: "${newRepo.blueprint.overview.slice(0, 60)}..."`
+  );
 
   // ─────────────────────────────────────────────────────────────────────────
   // PART 4: KNOWLEDGE BASE & MEMORY INGESTION
