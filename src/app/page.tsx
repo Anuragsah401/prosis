@@ -258,7 +258,7 @@ export default function ProsisOSPrimaryInterface() {
         {currentWorkspace !== "prosis" ? (
           <div className="w-full space-y-6">
             {/* Docked Living AI Core Bar inside Product Workspace */}
-            <div className="flex items-center justify-between p-3.5 surface-glass rounded-2xl border border-white/10">
+            <div className="flex items-center justify-between p-3.5 surface-hud rounded-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-3">
                 <AICoreVisual
                   state={voice.voiceState}
@@ -269,8 +269,8 @@ export default function ProsisOSPrimaryInterface() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono font-semibold text-white">Prosis Ambient Intelligence</span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-core-cyan/10 text-core-cyan border border-core-cyan/20">
-                      {voice.voiceState}
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/15 text-core-cyan border border-core-cyan/30 tracking-wider font-medium">
+                      ● {voice.voiceState.toUpperCase()}
                     </span>
                   </div>
                   <p className="text-[11px] text-gray-400 font-sans">
@@ -282,18 +282,18 @@ export default function ProsisOSPrimaryInterface() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => voice.toggleVoice()}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all active:scale-95 ${
                     voice.isVoiceActive
-                      ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/40"
-                      : "surface-glass text-gray-300 hover:text-white"
+                      ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/40 shadow-[0_0_15px_rgba(0,240,255,0.2)]"
+                      : "surface-hud text-gray-300 hover:text-white border border-white/10"
                   }`}
                 >
-                  <Mic className="w-3.5 h-3.5" />
+                  <Mic className="w-3.5 h-3.5 text-core-cyan" />
                   <span>{voice.isVoiceActive ? "Listening" : "Voice"}</span>
                 </button>
                 <button
                   onClick={() => setCurrentWorkspace("prosis")}
-                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono text-white transition-all"
+                  className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono text-white transition-all active:scale-95 border border-white/10"
                 >
                   Return to Prosis Core
                 </button>

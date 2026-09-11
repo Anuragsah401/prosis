@@ -111,22 +111,25 @@ export const MemoryManagerModal: React.FC<MemoryManagerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-      <div className="relative w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl bg-gradient-to-b from-[#0e121a] to-[#07090e] border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in">
+      <div className="relative w-full max-w-4xl max-h-[85vh] flex flex-col rounded-3xl surface-hud border border-white/10 shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden bg-obsidian-975">
+        {/* Top Specular Neon Ribbon */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-core-emerald" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-obsidian-975/90">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
+            <div className="p-2.5 rounded-xl bg-core-cyan/10 border border-core-cyan/30 text-core-cyan shadow-[0_0_15px_rgba(0,240,255,0.2)]">
               <Brain className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
-                Prosis Memory Intelligence
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-white/5 border border-white/10 text-gray-400">
-                  {memories.length} records
+              <h2 className="text-base font-semibold tracking-wide text-white flex items-center gap-2">
+                <span>Prosis Memory Intelligence</span>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded-full bg-white/5 border border-white/10 text-core-cyan">
+                  ● {memories.length} records
                 </span>
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 font-sans">
                 Inspect, correct, disable, or prune persistent multi-tier memories.
               </p>
             </div>
@@ -135,14 +138,14 @@ export const MemoryManagerModal: React.FC<MemoryManagerModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsAdding(!isAdding)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium bg-core-cyan/15 hover:bg-core-cyan/25 text-core-cyan border border-core-cyan/30 shadow-[0_0_15px_rgba(0,240,255,0.15)] transition-all active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Memory
+              <span>Add Memory</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

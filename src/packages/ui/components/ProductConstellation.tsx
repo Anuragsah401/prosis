@@ -102,34 +102,40 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="constellation-title"
     >
-      <div className="w-full max-w-2xl surface-glass-elevated rounded-3xl p-6 sm:p-8 space-y-6 relative border border-white/10 shadow-2xl">
+      <div className="w-full max-w-2xl surface-hud rounded-3xl p-6 sm:p-8 space-y-6 relative border border-white/10 shadow-[0_25px_80px_rgba(0,0,0,0.9)] bg-obsidian-975 overflow-hidden">
+        {/* Top Specular Neon Ribbon */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-core-emerald" />
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-core-cyan/10 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_15px_rgba(0,240,255,0.2)]">
               <Layers className="w-5 h-5 text-core-cyan" />
             </div>
             <div>
               <h2
                 id="constellation-title"
-                className="text-lg font-semibold tracking-tight text-white"
+                className="text-base font-semibold tracking-wide text-white flex items-center gap-2"
               >
-                Product Constellation
+                <span>Product Constellation Registry</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400">
+                  5 Ecosystem Nodes
+                </span>
               </h2>
               <p className="text-xs font-mono text-gray-400">
-                Connected business applications orchestrated by Prosis
+                Autonomous business applications orchestrated under Prosis Core
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Close constellation switcher"
           >
             <X className="w-5 h-5" />
@@ -153,15 +159,15 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
                 }}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-white/[0.06] border-core-cyan/50 shadow-[0_0_20px_rgba(56,189,248,0.1)]"
+                    ? "surface-hud-glow border-core-cyan/60 bg-core-cyan/[0.08] shadow-[0_0_25px_rgba(0,240,255,0.15)]"
                     : isActive
-                    ? "bg-white/[0.02] hover:bg-white/[0.04] border-white/10 hover:border-white/20"
-                    : "bg-white/[0.01] border-white/5 opacity-60 cursor-not-allowed"
+                    ? "surface-hud hover:border-core-cyan/40 bg-white/[0.02] hover:bg-white/[0.05]"
+                    : "bg-white/[0.01] border-white/5 opacity-50 cursor-not-allowed"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-obsidian-975 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
                       {prod.icon}
                     </div>
                     <div>
@@ -169,11 +175,11 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
                         <h3 className="text-sm font-semibold text-white">
                           {prod.name}
                         </h3>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 text-gray-400">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-gray-400">
                           v{prod.version}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                      <p className="text-xs text-gray-400 mt-1 leading-relaxed font-sans">
                         {prod.description}
                       </p>
 
@@ -182,7 +188,7 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
                         {prod.capabilities.map((cap, cIdx) => (
                           <span
                             key={cIdx}
-                            className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-gray-300"
+                            className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/5 text-[10px] font-mono text-gray-300"
                           >
                             {cap}
                           </span>
@@ -193,12 +199,12 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
 
                   <div className="shrink-0 ml-3">
                     {isActive ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-core-emerald/10 text-core-emerald border border-core-emerald/20 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-core-emerald/15 text-emerald-300 border border-core-emerald/30 flex items-center gap-1.5 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+                        <CheckCircle2 className="w-3 h-3 text-core-emerald" />
                         Connected
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white/5 text-gray-400 flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-white/5 text-gray-500 border border-white/10 flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5" />
                         Roadmap
                       </span>
@@ -211,8 +217,9 @@ export const ProductConstellation: React.FC<ProductConstellationProps> = ({
         </div>
 
         {/* Footer Note */}
-        <div className="text-center pt-2 text-[11px] font-mono text-gray-500 border-t border-white/5">
-          Prosis acts as the unified intelligence layer across all registered applications.
+        <div className="text-center pt-2 text-[11px] font-mono text-gray-500 border-t border-white/10 flex items-center justify-between">
+          <span>Tenant Scope: `org_acme_corp`</span>
+          <span>Unified Intelligence Protocol v2.4</span>
         </div>
       </div>
     </div>
