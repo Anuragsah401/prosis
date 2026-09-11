@@ -23,4 +23,5 @@ export * from "./components/workspaces/SeatbookingWorkspace";
 export * from "./components/workspaces/WorkforceWorkspace";
 export * from "./components/workspaces/MenuWorkspace";
 export * from "./components/workspaces/AnalyticsWorkspace";
+export * from "./components/LoginPage";
 export * from "../voice";

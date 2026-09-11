@@ -17,6 +17,8 @@ import {
   MemoryManagerModal,
   ListeningIndicator,
   SpeakingIndicator,
+  LoginPage,
+  AuthenticatedSession,
   useProsisSession,
 } from "@/packages/ui";
 import {
@@ -29,9 +31,13 @@ import {
   MicOff,
   AlertCircle,
   Brain,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function ProsisOSPrimaryInterface() {
+  const [session, setSession] = useState<AuthenticatedSession | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
   const [commandInput, setCommandInput] = useState<string>("");
 
   // Modals & Secondary Areas
@@ -58,6 +64,7 @@ export default function ProsisOSPrimaryInterface() {
     sendDirective,
     resolveApproval,
   } = useProsisSession({
+    sessionToken: session?.sessionToken,
     onWorkspaceAction: (action) => {
       if (action.type === "return_to_core") {
         setCurrentWorkspace("prosis");
@@ -70,9 +77,10 @@ export default function ProsisOSPrimaryInterface() {
   // Time-aware greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning, Operations Director";
-    if (hour < 17) return "Good afternoon, Operations Director";
-    return "Good evening, Operations Director";
+    const name = session?.user.name || "Operations Director";
+    if (hour < 12) return `Good morning, ${name}`;
+    if (hour < 17) return `Good afternoon, ${name}`;
+    return `Good evening, ${name}`;
   };
 
   const syncServerData = async () => {
@@ -91,7 +99,46 @@ export default function ProsisOSPrimaryInterface() {
   };
 
   useEffect(() => {
+    // Check saved session in localStorage
+    try {
+      const savedSession = localStorage.getItem("prosis_session");
+      if (savedSession) {
+        const parsed = JSON.parse(savedSession);
+        if (parsed && parsed.sessionToken) {
+          setSession(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("[ProsisOS] Failed to parse cached session:", e);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
+  const handleLoginSuccess = (newSession: AuthenticatedSession) => {
+    setSession(newSession);
+    try {
+      localStorage.setItem("prosis_session", JSON.stringify(newSession));
+      localStorage.setItem("prosis_session_token", newSession.sessionToken);
+    } catch {}
     syncServerData();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/v1/auth/session", { method: "POST" });
+    } catch {}
+    try {
+      localStorage.removeItem("prosis_session");
+      localStorage.removeItem("prosis_session_token");
+    } catch {}
+    setSession(null);
+  };
+
+  useEffect(() => {
+    if (session) {
+      syncServerData();
+    }
 
     // Global keyboard shortcuts (Cmd+K / Ctrl+K)
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,7 +156,7 @@ export default function ProsisOSPrimaryInterface() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [session]);
 
   const refreshMemoryState = async () => {
     try {
@@ -162,6 +209,30 @@ export default function ProsisOSPrimaryInterface() {
   };
 
   const hasTurns = turns.length > 0;
+
+  // Auth Verification Loading Screen
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-obsidian-975 text-gray-100 flex flex-col items-center justify-center p-6 cyber-grid-bg relative select-none">
+        <div className="relative flex items-center justify-center p-3">
+          <AICoreVisual state="thinking" audioLevel={0.4} size={72} />
+        </div>
+        <div className="mt-4 flex flex-col items-center space-y-1">
+          <span className="text-xs font-mono text-core-cyan uppercase tracking-widest animate-pulse">
+            // SYS.INITIALIZING PROTOCOL...
+          </span>
+          <span className="text-[11px] font-mono text-gray-500">
+            Validating neural credentials and zero-trust identity
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Unauthenticated Gate -> Render Futuristic Login Page
+  if (!session) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="min-h-screen bg-obsidian-975 text-gray-100 flex flex-col relative selection:bg-core-cyan/30 selection:text-white cyber-grid-bg">
@@ -250,6 +321,29 @@ export default function ProsisOSPrimaryInterface() {
           >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
+
+          {/* Active Operator Profile & Sign Out */}
+          {session && (
+            <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-white/10">
+              <div className="hidden lg:flex flex-col text-right">
+                <span className="text-xs font-mono font-medium text-white flex items-center gap-1.5 justify-end">
+                  <span className="w-1.5 h-1.5 rounded-full bg-core-emerald animate-pulse" />
+                  {session.user.name}
+                </span>
+                <span className="text-[9px] font-mono text-core-cyan uppercase tracking-wider">
+                  {session.user.role} // {session.organization.name}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                title="Lock Console / Sign Out"
+                className="p-2.5 rounded-full surface-hud hover:border-rose-500/40 text-gray-400 hover:text-rose-300 transition-all active:scale-95 group"
+                aria-label="Lock Console / Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5 group-hover:drop-shadow-[0_0_6px_rgba(244,63,94,0.5)]" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

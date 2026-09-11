@@ -5,6 +5,7 @@ import { MessageTurn } from "@prosis/orchestrator";
 import { useVoiceSession } from "./useVoiceSession";
 
 export interface ProsisSessionOptions {
+  sessionToken?: string;
   onWorkspaceAction?: (action: {
     type: "switch_workspace" | "return_to_core";
     targetProduct?: string;
@@ -79,9 +80,17 @@ export function useProsisSession(options?: ProsisSessionOptions) {
             timestamp: t.timestamp,
           }));
 
+        const reqHeaders: Record<string, string> = { "Content-Type": "application/json" };
+        const activeToken =
+          options?.sessionToken ||
+          (typeof window !== "undefined" ? localStorage.getItem("prosis_session_token") : null);
+        if (activeToken) {
+          reqHeaders["x-prosis-session"] = activeToken;
+        }
+
         const res = await fetch("/api/v1/chat/stream", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: reqHeaders,
           body: JSON.stringify({
             message: text,
             source,
@@ -141,9 +150,17 @@ export function useProsisSession(options?: ProsisSessionOptions) {
       );
 
       try {
+        const approvalHeaders: Record<string, string> = { "Content-Type": "application/json" };
+        const activeToken =
+          options?.sessionToken ||
+          (typeof window !== "undefined" ? localStorage.getItem("prosis_session_token") : null);
+        if (activeToken) {
+          approvalHeaders["x-prosis-session"] = activeToken;
+        }
+
         const res = await fetch(`/api/v1/approvals/${approvalId}/resolve`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: approvalHeaders,
           body: JSON.stringify({ approved }),
         });
 

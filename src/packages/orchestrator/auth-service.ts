@@ -199,6 +199,102 @@ export class AuthService {
   }
 
   /**
+   * Authenticates a user by email or user ID.
+   * Matches against SERVER_USER_DIRECTORY.
+   * Registers a session in ACTIVE_SESSIONS and returns it.
+   */
+  public static login(identifier: string, _password?: string): AuthenticatedSession | null {
+    if (!identifier) return null;
+    const cleanId = identifier.trim().toLowerCase();
+
+    // Match by ID or Email
+    let matchedUserId: string | null = null;
+    for (const [uid, record] of Object.entries(SERVER_USER_DIRECTORY)) {
+      if (uid.toLowerCase() === cleanId || record.user.email.toLowerCase() === cleanId) {
+        matchedUserId = uid;
+        break;
+      }
+    }
+
+    if (!matchedUserId) return null;
+    const record = SERVER_USER_DIRECTORY[matchedUserId];
+    const org = SERVER_ORGANIZATIONS[record.orgId];
+    if (!org) return null;
+
+    const sessionToken = `sess_auth_${matchedUserId}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const session: AuthenticatedSession = {
+      user: { ...record.user },
+      organization: { ...org },
+      allowedVenues: [...record.allowedVenues],
+      sessionToken,
+      expiresAt: new Date(Date.now() + 86400000).toISOString(), // 24 hours
+    };
+
+    ACTIVE_SESSIONS.set(sessionToken, session);
+    return session;
+  }
+
+  /**
+   * Retrieves the demo personas list for convenient 1-click access in UI.
+   */
+  public static getDemoUsers(): Array<{
+    userId: string;
+    name: string;
+    email: string;
+    role: string;
+    orgName: string;
+    venueCount: number;
+    description: string;
+  }> {
+    return [
+      {
+        userId: "user_director_01",
+        name: "Operations Director",
+        email: "director@acme-hospitality.com",
+        role: "owner",
+        orgName: "Acme Hospitality Group",
+        venueCount: 5,
+        description: "Universal Enterprise Access, 5 Venues, Level 1 Autonomy",
+      },
+      {
+        userId: "user_manager_cantina",
+        name: "Elena Rostova",
+        email: "elena@cantinabella.it",
+        role: "manager",
+        orgName: "Acme Hospitality Group",
+        venueCount: 1,
+        description: "Venue Manager: Restricted to Cantina Bella operations",
+      },
+      {
+        userId: "user_unauthorized_guest",
+        name: "External Auditor",
+        email: "auditor@external.com",
+        role: "member",
+        orgName: "Acme Hospitality Group",
+        venueCount: 0,
+        description: "Compliance Auditor: Read-only, zero operational dispatch permissions",
+      },
+      {
+        userId: "user_foreign_tenant",
+        name: "Foreign Operator",
+        email: "foreign@rival-hospitality.com",
+        role: "owner",
+        orgName: "Rival Hospitality Ltd",
+        venueCount: 1,
+        description: "Cross-Tenant Isolation: Separate enterprise entity",
+      },
+    ];
+  }
+
+  /**
+   * Logs out / invalidates an active session token.
+   */
+  public static logout(token: string): boolean {
+    if (!token) return false;
+    return ACTIVE_SESSIONS.delete(token);
+  }
+
+  /**
    * Checks whether the given session has access to a specific venue.
    * Strict Tenant Boundary: Venues outside the session's organization are always denied.
    */
