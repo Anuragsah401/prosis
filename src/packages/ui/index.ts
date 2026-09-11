@@ -25,4 +25,6 @@ export * from "./components/workspaces/WorkforceWorkspace";
 export * from "./components/workspaces/MenuWorkspace";
 export * from "./components/workspaces/AnalyticsWorkspace";
 export * from "./components/LoginPage";
+export * from "./components/ConnectedRepositoriesModal";
+export * from "./components/GithubIcon";
 export * from "../voice";

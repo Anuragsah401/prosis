@@ -126,4 +126,5 @@ class KnowledgeService {
 }
 
 export const Knowledge = new KnowledgeService();
+export * from "./github-repository-engine";
 

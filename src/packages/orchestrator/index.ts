@@ -8,4 +8,5 @@ export * from "./task-engine";
 export * from "./auth-service";
 export * from "./tool-execution-service";
 export * from "./tool-gateway-types";
+export * from "./repository-tools";
 export * from "./prosis-it";

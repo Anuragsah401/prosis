@@ -20,6 +20,8 @@ import {
   LoginPage,
   AuthenticatedSession,
   SystemSettingsModal,
+  ConnectedRepositoriesModal,
+  Github,
   useProsisSession,
 } from "@/packages/ui";
 import {
@@ -47,6 +49,7 @@ export default function ProsisOSPrimaryInterface() {
   const [telemetryOpen, setTelemetryOpen] = useState<boolean>(false);
   const [memoryModalOpen, setMemoryModalOpen] = useState<boolean>(false);
   const [systemSettingsOpen, setSystemSettingsOpen] = useState<boolean>(false);
+  const [repositoriesModalOpen, setRepositoriesModalOpen] = useState<boolean>(false);
   const [currentWorkspace, setCurrentWorkspace] = useState<string>("prosis");
   const [activeProductId, setActiveProductId] = useState<string>("prod_seatbooking_01");
 
@@ -317,6 +320,17 @@ export default function ProsisOSPrimaryInterface() {
           >
             <Brain className="w-3.5 h-3.5 text-core-violet group-hover:drop-shadow-[0_0_6px_#818cf8] transition-all" />
             <span className="hidden sm:inline">Matrix ({memories.length})</span>
+          </button>
+
+          {/* GitHub Repositories Knowledge Hub */}
+          <button
+            onClick={() => setRepositoriesModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-emerald-400/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
+            aria-label="Open Codebase Repositories"
+            title="Connected Codebases & GitHub Repositories"
+          >
+            <Github className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-all" />
+            <span className="hidden sm:inline">Repos</span>
           </button>
 
           {/* Telemetry / Memory Dock Toggle */}
@@ -793,6 +807,16 @@ export default function ProsisOSPrimaryInterface() {
         currentOrg={session?.organization}
         onLogout={handleLogout}
         onSwitchPersona={(newSession) => setSession(newSession)}
+        onOpenRepositories={() => {
+          setSystemSettingsOpen(false);
+          setRepositoriesModalOpen(true);
+        }}
+      />
+
+      {/* MODAL 5: Connected GitHub Repositories Knowledge Hub */}
+      <ConnectedRepositoriesModal
+        isOpen={repositoriesModalOpen}
+        onClose={() => setRepositoriesModalOpen(false)}
       />
     </div>
   );

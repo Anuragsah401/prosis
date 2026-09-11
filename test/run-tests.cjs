@@ -36,6 +36,11 @@ async function runAllTests() {
   if (typeof runProsisItValidation === "function") {
     await runProsisItValidation();
   }
+
+  const { runRepoIntelligenceTests } = jiti("./test/repository-intelligence-validation.ts");
+  if (typeof runRepoIntelligenceTests === "function") {
+    await runRepoIntelligenceTests();
+  }
 }
 
 runAllTests().catch((err) => {

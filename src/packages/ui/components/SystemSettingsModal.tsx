@@ -25,7 +25,9 @@ import {
   Database,
   Building2,
   Zap,
+  ChevronRight,
 } from "lucide-react";
+import { Github } from "./GithubIcon";
 import {
   AutonomyLevel,
   AUTONOMY_LEVEL_LABELS,
@@ -80,6 +82,7 @@ interface SystemSettingsModalProps {
   onLogout?: () => void;
   onSwitchPersona?: (session: AuthenticatedSession) => void;
   onSettingsSaved?: (newSettings: SystemSettingsConfig) => void;
+  onOpenRepositories?: () => void;
 }
 
 export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
@@ -90,6 +93,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
   onLogout,
   onSwitchPersona,
   onSettingsSaved,
+  onOpenRepositories,
 }) => {
   const [activeTab, setActiveTab] = useState<"autonomy" | "cognitive" | "products" | "security">("autonomy");
   const [isLoading, setIsLoading] = useState(false);
@@ -765,6 +769,31 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
                   </label>
                 </div>
               </div>
+
+              {/* GitHub Repositories & Codebase Intelligence Integration */}
+              <div className="p-4 rounded-2xl bg-core-cyan/[0.04] border border-core-cyan/20 flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="text-xs font-semibold text-white font-mono flex items-center gap-2">
+                    <Github className="w-4 h-4 text-core-cyan" />
+                    <span>CONNECTED GITHUB REPOSITORIES</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 font-sans">
+                    Ingest codebases, API routes, and database schemas so Prosis AI assistant understands external repositories.
+                  </p>
+                </div>
+                {onOpenRepositories && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenRepositories();
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-core-cyan/20 hover:bg-core-cyan/30 text-core-cyan border border-core-cyan/40 font-mono text-xs flex items-center gap-1.5 transition-all shrink-0 active:scale-95"
+                  >
+                    <span>Manage Repositories</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -926,3 +955,4 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
     </div>
   );
 };
+

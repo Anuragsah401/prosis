@@ -44,7 +44,12 @@ Conversational Rules:
 9. Telemetry Reflection: When "previousResults" contains data from executed tools, evaluate the real data. If sufficient, synthesize an executive summary with nextAction="response". If another tool is required, request it.
 10. Ambiguity & Missing Parameters: If a directive is ambiguous ("Something isn't right for tomorrow") or lacks critical parameters, set nextAction="clarification" with a concise clarifying question.
 11. High-Impact & Destructive Protection: For destructive operations (cancellations, deletions, emergency overrides), set requiresApproval=true and nextAction="approval_required".
-12. Structured Output: Return a valid JSON object matching the required schema. reasoningSummary must be a concise, user-safe rationale, NOT private internal chain-of-thought.
+12. Codebase & Repository Intelligence: When the user asks about the architecture, codebase, endpoints, database schemas, or inner workings of connected repositories (e.g. Seatbooking repository, Prosis repository, or external GitHub links), use the repository intelligence tools:
+   - Call repo_queryRepositoryKnowledge with the user's inquiry to inspect endpoints, schemas, and architecture.
+   - Call repo_listConnectedRepositories to see what systems are connected and their capabilities.
+   - Call repo_inspectFileOrModule to examine specific source files.
+   Synthesize authoritative, comprehensive answers explaining the code, endpoints, database models, algorithms, and design decisions.
+13. Structured Output: Return a valid JSON object matching the required schema. reasoningSummary must be a concise, user-safe rationale, NOT private internal chain-of-thought.
 `.trim();
 
 /**
@@ -284,6 +289,42 @@ export class TestReasoningProvider implements IProsisReasoningEngine {
           selectedCapability: "workforce",
           selectedTool: "workforce_planShifts",
           toolArguments: { venueId: prosisContext.activeVenue },
+        };
+      }
+
+      if (firstResult.knowledgeMatches) {
+        const matches: any[] = firstResult.knowledgeMatches;
+        const summary = matches.map((m: any) => `• ${m.title}: ${m.snippet}`).join("\n");
+        return {
+          understanding: {
+            intent: "repository_knowledge_synthesis",
+            classification: "information_request",
+            targetCapabilities: ["repository_intelligence"],
+            isDestructive: false,
+            confidence: 0.99,
+          },
+          goal: "Synthesize repository architecture knowledge",
+          reasoningSummary: "Evaluated retrieved repository knowledge and codebase blueprints.",
+          nextAction: "response",
+          finalResponse: `Here is the architectural breakdown from the connected repository:\n\n${summary}`,
+        };
+      }
+
+      if (firstResult.repositories) {
+        const repos: any[] = firstResult.repositories;
+        const summary = repos.map((r: any) => `• ${r.name} (${r.url}) - Status: ${r.status}, Files: ${r.filesIndexed}, Tech Stack: ${r.techStack.join(", ")}`).join("\n");
+        return {
+          understanding: {
+            intent: "repository_list_synthesis",
+            classification: "information_request",
+            targetCapabilities: ["repository_intelligence"],
+            isDestructive: false,
+            confidence: 0.99,
+          },
+          goal: "List connected repositories",
+          reasoningSummary: "Retrieved active repository registrations.",
+          nextAction: "response",
+          finalResponse: `Connected Repositories:\n\n${summary}`,
         };
       }
 
@@ -674,6 +715,49 @@ export class TestReasoningProvider implements IProsisReasoningEngine {
         reasoningSummary: "Target domain is Workforce Management, which is currently on the Prosis ecosystem roadmap.",
         nextAction: "response",
         finalResponse: "Workforce & Staff Management is part of the Prosis ecosystem roadmap. Shift auto-balancing based on cover forecasts is scheduled for upcoming release.",
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 13B. REPOSITORY & CODEBASE INTELLIGENCE QUERIES
+    // E.g. "What git repositories are connected?", "Explain the architecture of the Seatbooking repository"
+    // ─────────────────────────────────────────────────────────────────────────
+    if (
+      /repo|repository|github|codebase|tech stack|architecture of/i.test(lower) ||
+      (/seatbooking/i.test(lower) && /architecture|system design|code|endpoints?|routes?|schemas?|models?|stack/i.test(lower))
+    ) {
+      if (/what (git )?repos|list.*repos|connected repos/i.test(lower)) {
+        return {
+          understanding: {
+            intent: "list_connected_repositories",
+            classification: "information_request",
+            targetCapabilities: ["repository_intelligence"],
+            isDestructive: false,
+            confidence: 0.98,
+          },
+          goal: "Inspect connected repositories and index status",
+          reasoningSummary: "User requested list of connected code repositories. Invoking repo_listConnectedRepositories.",
+          nextAction: "tool_request",
+          selectedCapability: "repository_intelligence",
+          selectedTool: "repo_listConnectedRepositories",
+          toolArguments: {},
+        };
+      }
+
+      return {
+        understanding: {
+          intent: "query_repository_knowledge",
+          classification: "information_request",
+          targetCapabilities: ["repository_intelligence"],
+          isDestructive: false,
+          confidence: 0.98,
+        },
+        goal: "Query codebase architecture, schemas, and endpoints from connected repository",
+        reasoningSummary: "User requested repository architecture or codebase knowledge. Invoking repo_queryRepositoryKnowledge.",
+        nextAction: "tool_request",
+        selectedCapability: "repository_intelligence",
+        selectedTool: "repo_queryRepositoryKnowledge",
+        toolArguments: { query: userMessage, repoId: "repo_seatbooking_core" },
       };
     }
 

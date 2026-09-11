@@ -34,6 +34,9 @@ export * from "./tool-gateway-types";
 const REALTIME_TOOL_ALLOWLIST = new Set([
   "getVenueAnalytics",
   "seatbooking_getReservationAnalytics",
+  "repo_queryRepositoryKnowledge",
+  "repo_listConnectedRepositories",
+  "repo_inspectFileOrModule",
 ]);
 
 // Canonical name normalization

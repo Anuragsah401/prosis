@@ -22,6 +22,7 @@ import { IProsisReasoningEngine, ProsisReasoningEngine } from "./reasoning-engin
 import { ToolExecutionService } from "../tool-execution-service";
 import { ToolRegistry } from "../../tools";
 import { TrustedExecutionContext } from "../tool-gateway-types";
+import "../repository-tools";
 
 export class ProsisItOrchestrator {
   private reasoningEngine: IProsisReasoningEngine;

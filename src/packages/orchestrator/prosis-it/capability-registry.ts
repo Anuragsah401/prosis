@@ -130,6 +130,28 @@ class ProsisCapabilityRegistry {
       ],
       futureRoadmapNotes: "IoT refrigeration monitoring and preventive maintenance alerts planned for upcoming release.",
     });
+
+    // 7. Codebase & Repository Intelligence
+    this.register({
+      id: "repository_intelligence",
+      name: "Codebase & Repository Intelligence",
+      product: "repositories",
+      description: "Inspects connected GitHub repositories (e.g. Seatbooking, Workforce, Prosis), analyzing codebase architecture, endpoints, database schemas, and source modules.",
+      status: "implemented",
+      availableTools: [
+        "repo_queryRepositoryKnowledge",
+        "repo_listConnectedRepositories",
+        "repo_inspectFileOrModule",
+      ],
+      requiredPermissions: [],
+      supportedOperations: [
+        "query_architecture",
+        "list_endpoints",
+        "inspect_schemas",
+        "search_codebase",
+      ],
+      futureRoadmapNotes: "Real-time git commit polling and automated pull-request risk impact simulation.",
+    });
   }
 
   /**
