@@ -19,19 +19,20 @@ import {
   SpeakingIndicator,
   LoginPage,
   AuthenticatedSession,
+  SystemSettingsModal,
   useProsisSession,
 } from "@/packages/ui";
 import {
   Paperclip,
   Send,
   SlidersHorizontal,
+  Sliders,
   Layers,
   ChevronRight,
   Mic,
   MicOff,
   AlertCircle,
   Brain,
-  LogOut,
   ShieldCheck,
 } from "lucide-react";
 
@@ -45,6 +46,7 @@ export default function ProsisOSPrimaryInterface() {
   const [productHubOpen, setProductHubOpen] = useState<boolean>(false);
   const [telemetryOpen, setTelemetryOpen] = useState<boolean>(false);
   const [memoryModalOpen, setMemoryModalOpen] = useState<boolean>(false);
+  const [systemSettingsOpen, setSystemSettingsOpen] = useState<boolean>(false);
   const [currentWorkspace, setCurrentWorkspace] = useState<string>("prosis");
   const [activeProductId, setActiveProductId] = useState<string>("prod_seatbooking_01");
 
@@ -317,20 +319,40 @@ export default function ProsisOSPrimaryInterface() {
             <span className="hidden sm:inline">Matrix ({memories.length})</span>
           </button>
 
-          {/* Telemetry / Profile Settings */}
+          {/* Telemetry / Memory Dock Toggle */}
           <button
             onClick={() => setTelemetryOpen(!telemetryOpen)}
             className="p-2.5 rounded-full surface-hud hover:border-white/20 text-gray-400 hover:text-white transition-all"
             aria-label="Toggle Telemetry & Memory Dock"
+            title="Telemetry & Memory Dock"
           >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
 
-          {/* Active Operator Profile & Sign Out */}
+          {/* System Control & Governance Settings Button */}
+          <button
+            onClick={() => setSystemSettingsOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-core-cyan/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
+            aria-label="Open System Settings"
+            title="System Settings & Governance Control"
+          >
+            <Sliders className="w-3.5 h-3.5 text-core-cyan group-hover:rotate-45 transition-all" />
+            <span className="hidden sm:inline">Settings</span>
+          </button>
+
+          {/* Active Operator Profile (Clickable to open System Settings) */}
           {session && (
-            <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-white/10">
-              <div className="hidden lg:flex flex-col text-right">
-                <span className="text-xs font-mono font-medium text-white flex items-center gap-1.5 justify-end">
+            <button
+              onClick={() => setSystemSettingsOpen(true)}
+              className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-white/10 hover:opacity-90 transition-opacity text-left cursor-pointer group"
+              title="Operator Identity & Security Settings"
+              aria-label="Operator Identity & Security Settings"
+            >
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-xs font-mono font-bold text-core-cyan shrink-0 group-hover:border-core-cyan transition-all">
+                {session.user.name.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="hidden lg:flex flex-col text-left">
+                <span className="text-xs font-mono font-medium text-white flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-core-emerald animate-pulse" />
                   {session.user.name}
                 </span>
@@ -338,15 +360,7 @@ export default function ProsisOSPrimaryInterface() {
                   {session.user.role} // {session.organization.name}
                 </span>
               </div>
-              <button
-                onClick={handleLogout}
-                title="Lock Console / Sign Out"
-                className="p-2.5 rounded-full surface-hud hover:border-rose-500/40 text-gray-400 hover:text-rose-300 transition-all active:scale-95 group"
-                aria-label="Lock Console / Sign Out"
-              >
-                <LogOut className="w-3.5 h-3.5 group-hover:drop-shadow-[0_0_6px_rgba(244,63,94,0.5)]" />
-              </button>
-            </div>
+            </button>
           )}
         </div>
       </header>
@@ -769,6 +783,16 @@ export default function ProsisOSPrimaryInterface() {
         onUpdateMemory={handleUpdateMemory}
         onDeleteMemory={handleDeleteMemory}
         onAddMemory={handleAddMemory}
+      />
+
+      {/* MODAL 4: Dedicated System Control & Governance Settings */}
+      <SystemSettingsModal
+        isOpen={systemSettingsOpen}
+        onClose={() => setSystemSettingsOpen(false)}
+        currentUser={session?.user}
+        currentOrg={session?.organization}
+        onLogout={handleLogout}
+        onSwitchPersona={(newSession) => setSession(newSession)}
       />
     </div>
   );

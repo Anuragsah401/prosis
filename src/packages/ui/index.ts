@@ -4,6 +4,7 @@ export * from "./components/ApprovalCard";
 export * from "./components/TaskProgressCard";
 export * from "./components/ProactiveBriefingCard";
 export * from "./components/AutonomySettingsModal";
+export * from "./components/SystemSettingsModal";
 export * from "./components/surfaces/AnalyticsSurfaceCard";
 export * from "./components/surfaces/ComparisonSurfaceCard";
 export * from "./components/surfaces/EmailComposerSurfaceCard";
