@@ -177,6 +177,21 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
     }
   };
 
+  const handleClearAll = async () => {
+    if (!confirm("Are you sure you want to clear all connected repositories?")) return;
+    try {
+      const res = await fetch("/api/v1/repositories", { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setRepositories([]);
+        setSelectedRepoForBlueprint(null);
+        setSuccessMessage("All connected repositories have been cleared.");
+      }
+    } catch (err) {
+      console.error("Failed to clear repositories:", err);
+    }
+  };
+
   const handleTestSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
@@ -256,7 +271,7 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
               <div className="md:col-span-8 relative">
                 <input
                   type="text"
-                  placeholder="https://github.com/Anuragsah401/seatbooking"
+                  placeholder="https://github.com/owner/repository"
                   value={repoUrlInput}
                   onChange={(e) => setRepoUrlInput(e.target.value)}
                   disabled={isConnecting}
@@ -312,32 +327,6 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
               </div>
             )}
 
-            {/* 1-Click Preset Links */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[10px] font-mono text-gray-500 uppercase">Quick Presets:</span>
-              <button
-                onClick={() => {
-                  setRepoUrlInput("https://github.com/Anuragsah401/seatbooking");
-                  handleConnect("https://github.com/Anuragsah401/seatbooking");
-                }}
-                disabled={isConnecting}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-core-cyan/15 text-gray-300 hover:text-core-cyan border border-white/10 hover:border-core-cyan/30 text-[11px] font-mono flex items-center gap-1.5 transition-all"
-              >
-                <span>🪑 Seatbooking (Anuragsah401)</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setRepoUrlInput("https://github.com/Anuragsah401/prosis");
-                  handleConnect("https://github.com/Anuragsah401/prosis");
-                }}
-                disabled={isConnecting}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-core-violet/15 text-gray-300 hover:text-core-violet border border-white/10 hover:border-core-violet/30 text-[11px] font-mono flex items-center gap-1.5 transition-all"
-              >
-                <span>⚡ Prosis OS Repository</span>
-              </button>
-            </div>
-
             {/* Stepped Indexing Progress Terminal */}
             {isConnecting && (
               <div className="p-4 rounded-xl bg-black/60 border border-core-cyan/30 space-y-2 animate-fade-in font-mono text-xs">
@@ -391,17 +380,42 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
               <label className="text-[10px] font-mono uppercase tracking-wider font-bold text-gray-300">
                 Connected Repositories ({repositories.length})
               </label>
-              <button
-                onClick={loadRepositories}
-                className="text-[10px] font-mono text-gray-400 hover:text-white flex items-center gap-1"
-              >
-                <RefreshCw className={`w-3 h-3 ${isLoading ? "animate-spin" : ""}`} />
-                <span>Refresh</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {repositories.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className="text-[10px] font-mono text-rose-400/80 hover:text-rose-300 flex items-center gap-1 transition-colors px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20"
+                    title="Clear all repositories"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Clear All</span>
+                  </button>
+                )}
+                <button
+                  onClick={loadRepositories}
+                  className="text-[10px] font-mono text-gray-400 hover:text-white flex items-center gap-1"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isLoading ? "animate-spin" : ""}`} />
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {repositories.map((repo) => {
+              {repositories.length === 0 ? (
+                <div className="col-span-full p-8 rounded-2xl bg-white/[0.01] border border-dashed border-white/10 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-core-cyan/10 border border-core-cyan/20 flex items-center justify-center text-core-cyan mx-auto shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+                    <GitBranch className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-mono text-white font-semibold tracking-wide uppercase">// ZERO CONNECTED REPOSITORIES</p>
+                    <p className="text-[11px] font-mono text-gray-400 max-w-md mx-auto leading-relaxed">
+                      System is clean. Enter any public or private GitHub repository URL above to connect and index its real architectural blueprint.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                repositories.map((repo) => {
                 const isSelected = selectedRepoForBlueprint?.id === repo.id;
                 return (
                   <div
@@ -468,7 +482,7 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
                     </div>
                   </div>
                 );
-              })}
+              }))}
             </div>
           </div>
 

@@ -54,6 +54,7 @@ export async function runRepoIntelligenceTests(): Promise<boolean> {
   // PART 2: SEEDED SEATBOOKING REPOSITORY BLUEPRINT
   // ─────────────────────────────────────────────────────────────────────────
   console.log("\n[Test 2] Default Seeded Repository Architecture Blueprint");
+  GitHubRepositoryEngine.seedDefaultRepositories();
   const repos = GitHubRepositoryEngine.listRepositories();
   const seatbooking = repos.find((r) => r.name === "seatbooking-core");
 

@@ -757,7 +757,7 @@ export class TestReasoningProvider implements IProsisReasoningEngine {
         nextAction: "tool_request",
         selectedCapability: "repository_intelligence",
         selectedTool: "repo_queryRepositoryKnowledge",
-        toolArguments: { query: userMessage, repoId: "repo_seatbooking_core" },
+        toolArguments: { query: userMessage },
       };
     }
 

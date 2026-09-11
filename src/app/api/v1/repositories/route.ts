@@ -49,3 +49,19 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE() {
+  try {
+    GitHubRepositoryEngine.clearAllRepositories();
+    return NextResponse.json({
+      success: true,
+      message: "All connected repositories have been successfully cleared.",
+      count: 0,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || "Failed to clear repositories" },
+      { status: 500 }
+    );
+  }
+}
+

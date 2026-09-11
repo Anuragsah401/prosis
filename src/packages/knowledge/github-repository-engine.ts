@@ -59,7 +59,7 @@ class GitHubRepositoryEngineService {
   private ensureInitialized(): void {
     if (this.initialized) return;
     this.initialized = true;
-    this.seedDefaultRepositories();
+    // System starts completely clean with 0 pre-seeded repositories
   }
 
   constructor() {
@@ -67,10 +67,18 @@ class GitHubRepositoryEngineService {
   }
 
   /**
-   * Seed canonical repositories including Seatbooking so Prosis already has
-   * rich, authoritative knowledge of the real Seatbooking ecosystem on startup.
+   * Clear all connected repositories from Prosis.
    */
-  private seedDefaultRepositories() {
+  public clearAllRepositories(): void {
+    this.ensureInitialized();
+    this.repositories.clear();
+  }
+
+  /**
+   * Seed canonical repositories on-demand (e.g. for testing suites).
+   */
+  public seedDefaultRepositories(): void {
+    this.ensureInitialized();
     const seatbookingRepo: ConnectedRepository = {
       id: "repo_seatbooking_core",
       name: "seatbooking-core",
@@ -315,11 +323,10 @@ class GitHubRepositoryEngineService {
     filePath: string,
     token?: string
   ): Promise<string | null> {
-    // 1. Local workspace check
+    // 1. Local workspace check (only if repo is explicitly prosis and local file exists)
     try {
       const isLocalWorkspace =
-        repo.toLowerCase() === "prosis" ||
-        owner.toLowerCase() === "anuragsah401" ||
+        repo.toLowerCase() === "prosis" &&
         fs.existsSync(path.join(process.cwd(), filePath));
 
       if (isLocalWorkspace) {
@@ -490,12 +497,10 @@ class GitHubRepositoryEngineService {
     routeContents?: Array<{ path: string; content: string }>;
     modelContents?: Array<{ path: string; content: string }>;
   }> {
-    // 1. If this repository matches local workspace, scan directly
+    // 1. If this repository matches local prosis workspace, scan directly
     const isLocalWorkspace =
-      repo.toLowerCase() === "prosis" ||
-      owner.toLowerCase() === "anuragsah401" ||
-      (fs.existsSync(path.join(process.cwd(), "package.json")) &&
-        path.basename(process.cwd()).toLowerCase() === repo.toLowerCase());
+      repo.toLowerCase() === "prosis" &&
+      path.basename(process.cwd()).toLowerCase() === "prosis";
 
     if (isLocalWorkspace) {
       return this.scanLocalRepository(process.cwd());
