@@ -52,14 +52,47 @@ export interface IngestOptions {
   orgScope?: string;
 }
 
+const STORAGE_FILE = path.join(process.cwd(), "data", "connected-repositories.json");
+
 class GitHubRepositoryEngineService {
   private repositories: Map<string, ConnectedRepository> = new Map();
   private initialized = false;
 
+  private loadFromDisk(): void {
+    try {
+      if (fs.existsSync(STORAGE_FILE)) {
+        const raw = fs.readFileSync(STORAGE_FILE, "utf-8");
+        const list: ConnectedRepository[] = JSON.parse(raw);
+        if (Array.isArray(list) && list.length > 0) {
+          for (const repo of list) {
+            this.repositories.set(repo.id, repo);
+            this.ingestBlueprintToKnowledge(repo);
+          }
+          console.log(`[GitHubRepositoryEngine] Restored ${list.length} connected repositories from disk storage.`);
+        }
+      }
+    } catch (e) {
+      console.warn("[GitHubRepositoryEngine] Could not load repositories from disk:", e);
+    }
+  }
+
+  private saveToDisk(): void {
+    try {
+      const dir = path.dirname(STORAGE_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const list = Array.from(this.repositories.values());
+      fs.writeFileSync(STORAGE_FILE, JSON.stringify(list, null, 2), "utf-8");
+    } catch (e) {
+      console.warn("[GitHubRepositoryEngine] Could not save repositories to disk:", e);
+    }
+  }
+
   private ensureInitialized(): void {
     if (this.initialized) return;
     this.initialized = true;
-    // System starts completely clean with 0 pre-seeded repositories
+    this.loadFromDisk();
   }
 
   constructor() {
@@ -72,6 +105,7 @@ class GitHubRepositoryEngineService {
   public clearAllRepositories(): void {
     this.ensureInitialized();
     this.repositories.clear();
+    this.saveToDisk();
   }
 
   /**
@@ -303,6 +337,7 @@ class GitHubRepositoryEngineService {
       // 3. Ingest into Prosis Knowledge Base & Memory
       this.ingestBlueprintToKnowledge(repo, orgScope);
 
+      this.saveToDisk();
       console.log(`[GitHubRepositoryEngine] Successfully indexed ${repo.name} (${repo.filesIndexed} files, status: READY).`);
       return repo;
     } catch (err: any) {
@@ -1162,7 +1197,9 @@ class GitHubRepositoryEngineService {
    */
   public disconnectRepository(id: string): boolean {
     this.ensureInitialized();
-    return this.repositories.delete(id);
+    const deleted = this.repositories.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
   }
 
   /**
