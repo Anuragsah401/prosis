@@ -48,11 +48,187 @@ export const TelemetryDock: React.FC<TelemetryDockProps> = ({
   const [activeTab, setActiveTab] = useState<"products" | "memory" | "audit" | "knowledge">("products");
 
   return (
-    <aside
-      className={`fixed top-0 right-0 h-screen z-40 transition-all duration-300 ease-in-out border-l border-white/10 hover:border-core-cyan/40 bg-obsidian-975/95 backdrop-blur-2xl flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.8),-5px_0_25px_rgba(0,240,255,0.06)] ${
-        isOpen ? "w-96" : "w-14"
-      }`}
-    >
+    <>
+      {/* ── MOBILE: Bottom Sheet (< md) ── */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          onClick={onToggle}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[80vh] bg-obsidian-975 border-t border-white/10 rounded-t-3xl flex flex-col shadow-[0_-20px_60px_rgba(0,0,0,0.9)] animate-fade-in overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top ribbon */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-emerald-400 shadow-[0_0_12px_#00f0ff] rounded-t-3xl" />
+            {/* Drag handle */}
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-core-cyan/10 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_10px_rgba(0,240,255,0.25)]">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="font-mono text-xs font-bold tracking-wider text-white block">SYS.TELEMETRY</span>
+                  <span className="font-mono text-[9px] text-core-cyan tracking-widest">// REAL-TIME BUS</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
+                  </span>
+                  ONLINE
+                </span>
+                <button onClick={onToggle} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors" aria-label="Close">
+                  <ChevronRight className="w-4 h-4 rotate-90" />
+                </button>
+              </div>
+            </div>
+            {/* Tab nav */}
+            <div className="grid grid-cols-4 p-2 gap-1 border-b border-white/10 bg-obsidian-900/80 text-xs font-mono shrink-0">
+              {(["products", "memory", "audit", "knowledge"] as const).map((tab) => {
+                const icons = { products: Layers, memory: Brain, audit: Activity, knowledge: BookOpen };
+                const labels = { products: "Products", memory: "Memory", audit: "Audit", knowledge: "Policy" };
+                const colors = {
+                  products: "bg-core-cyan/15 text-core-cyan border-core-cyan/40",
+                  memory: "bg-core-violet/20 text-core-violet border-core-violet/40",
+                  audit: "bg-amber-400/15 text-amber-400 border-amber-400/40",
+                  knowledge: "bg-emerald-400/15 text-emerald-400 border-emerald-400/40",
+                };
+                const Icon = icons[tab];
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`py-2 rounded-xl flex flex-col items-center gap-1 transition-all ${
+                      activeTab === tab
+                        ? `${colors[tab]} border font-bold shadow-[0_0_12px_rgba(0,240,255,0.2)]`
+                        : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="text-[10px]">{labels[tab]}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {/* Tab body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {activeTab === "products" && (
+                <div className="space-y-3">
+                  <div className="text-xs text-gray-400 font-mono flex items-center justify-between">
+                    <span className="tracking-wider uppercase font-semibold text-gray-300">FEDERATED BUS ({products.length})</span>
+                    <span className="text-[10px] text-core-cyan font-bold px-2 py-0.5 rounded-full bg-core-cyan/10 border border-core-cyan/30">HOT-PLUG</span>
+                  </div>
+                  {products.map((prod) => (
+                    <div key={prod.id} className="p-3.5 rounded-2xl surface-hud border border-white/10 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-white font-mono">{prod.name}</span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 text-core-cyan border border-core-cyan/30">v{prod.version}</span>
+                          </div>
+                          <p className="text-xs text-gray-300 mt-1 leading-relaxed">{prod.description}</p>
+                        </div>
+                        <span className="relative flex h-2 w-2 shrink-0 mt-1">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {activeTab === "memory" && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                    <span className="tracking-wider uppercase font-semibold text-gray-300">MEMORY MATRIX</span>
+                    <span className="text-[10px] font-bold text-core-violet px-2 py-0.5 rounded-full bg-core-violet/10 border border-core-violet/30">{memories.length} RECORDS</span>
+                  </div>
+                  {memories.map((mem) => (
+                    <div key={mem.id} className="p-3.5 rounded-2xl surface-hud border border-white/10 text-xs space-y-2 relative group">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          mem.type === "company_memory" ? "bg-core-violet/20 text-core-violet border border-core-violet/40"
+                          : mem.type === "task_memory" ? "bg-amber-400/20 text-amber-300 border border-amber-400/40"
+                          : mem.type === "user_preference" ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/40"
+                          : "bg-gray-500/20 text-gray-300 border border-gray-500/40"
+                        }`}>{mem.type.replace("_", " ")}</span>
+                        <button onClick={() => onDeleteMemory(mem.id)} className="text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" aria-label="Delete Memory">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="font-mono text-white text-[12px] font-semibold">{mem.key}</div>
+                      <p className="text-gray-300 text-xs leading-relaxed font-sans">{mem.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {activeTab === "audit" && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                    <span className="tracking-wider uppercase font-semibold text-gray-300">IMMUTABLE LEDGER</span>
+                    <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">SECURE</span>
+                  </div>
+                  {auditLogs.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-gray-400 font-mono surface-hud rounded-2xl border border-white/10">No operations yet.</div>
+                  ) : auditLogs.map((log) => (
+                    <div key={log.id} className="p-3.5 rounded-2xl surface-hud border border-white/10 text-xs space-y-2 font-mono">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-core-cyan text-[11.5px] truncate max-w-[60%]">{log.toolName}</span>
+                        <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border uppercase ${log.executionStatus === "success" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-rose-500/15 text-rose-400 border-rose-500/30"}`}>{log.executionStatus}</span>
+                      </div>
+                      {log.resultSummary && <p className="text-gray-300 text-[11px] font-sans leading-relaxed">{log.resultSummary}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {activeTab === "knowledge" && (
+                <div className="space-y-3">
+                  <div className="text-xs text-gray-400 font-mono flex items-center justify-between">
+                    <span className="tracking-wider uppercase font-semibold text-gray-300">RETRIEVAL GOVERNANCE</span>
+                    <span className="text-[10px] text-core-violet font-bold px-2 py-0.5 rounded-full bg-core-violet/10 border border-core-violet/30">ENFORCED</span>
+                  </div>
+                  <div className="p-4 rounded-2xl surface-hud border border-white/10 space-y-2.5">
+                    <div className="flex items-center gap-2 text-core-cyan font-semibold text-xs font-mono"><Shield className="w-4 h-4 text-core-cyan" /><span>// SHIELD.v1: OUTBOUND GATE</span></div>
+                    <p className="text-gray-300 text-xs leading-relaxed font-sans">Outbound communications require explicit human-in-the-loop authorization.</p>
+                  </div>
+                  <div className="p-4 rounded-2xl surface-hud border border-white/10 space-y-2.5">
+                    <div className="flex items-center gap-2 text-core-violet font-semibold text-xs font-mono"><BookOpen className="w-4 h-4 text-core-violet" /><span>// SOP.v2: DECLINING PACING</span></div>
+                    <p className="text-gray-300 text-xs leading-relaxed font-sans">Venues with &gt;20% weekly drop trigger an automated recovery campaign.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Footer */}
+            {currentUser && (
+              <div className="p-3.5 border-t border-white/10 bg-obsidian-950/90 flex items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-xs font-mono font-bold text-core-cyan shrink-0">{currentUser.name.slice(0, 2).toUpperCase()}</div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-gray-200 truncate">{currentUser.name}</div>
+                    <div className="text-[10px] font-mono text-core-cyan/80 truncate uppercase tracking-wider">{currentUser.role}</div>
+                  </div>
+                </div>
+                {onLogout && (
+                  <button onClick={onLogout} className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 text-[11px] font-mono flex items-center gap-1.5 transition-all shrink-0 active:scale-95" title="Log Out">
+                    <LogOut className="w-3.5 h-3.5" /><span>Lock</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── DESKTOP: Right-Side Drawer (≥ md) ── */}
+      <aside
+        className={`fixed top-0 right-0 h-screen z-40 transition-all duration-300 ease-in-out border-l border-white/10 hover:border-core-cyan/40 bg-obsidian-975/95 backdrop-blur-2xl flex-col shadow-[0_0_50px_rgba(0,0,0,0.8),-5px_0_25px_rgba(0,240,255,0.06)] hidden md:flex ${
+          isOpen ? "w-96" : "w-14"
+        }`}
+      >
       {/* Top Ambient Glow Ribbon */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-emerald-400 shadow-[0_0_12px_#00f0ff]" />
 
@@ -502,6 +678,7 @@ export const TelemetryDock: React.FC<TelemetryDockProps> = ({
         </div>
       )}
     </aside>
+    </>
   );
 };
 

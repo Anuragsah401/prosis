@@ -36,6 +36,8 @@ import {
   AlertCircle,
   Brain,
   ShieldCheck,
+  MoreHorizontal,
+  X,
 } from "lucide-react";
 
 export default function ProsisOSPrimaryInterface() {
@@ -50,6 +52,7 @@ export default function ProsisOSPrimaryInterface() {
   const [memoryModalOpen, setMemoryModalOpen] = useState<boolean>(false);
   const [systemSettingsOpen, setSystemSettingsOpen] = useState<boolean>(false);
   const [repositoriesModalOpen, setRepositoriesModalOpen] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [currentWorkspace, setCurrentWorkspace] = useState<string>("prosis");
   const [activeProductId, setActiveProductId] = useState<string>("prod_seatbooking_01");
 
@@ -250,25 +253,25 @@ export default function ProsisOSPrimaryInterface() {
 
       {/* TOP HUD BAR */}
       <header
-        className={`relative z-20 h-20 pl-6 sm:pl-10 border-b border-white/[0.08] bg-obsidian-950/70 backdrop-blur-2xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ${
-          telemetryOpen ? "pr-6 sm:pr-8 lg:pr-[410px]" : "pr-20 sm:pr-24"
+        className={`relative z-20 h-16 sm:h-20 pl-4 sm:pl-6 md:pl-10 border-b border-white/[0.08] bg-obsidian-950/70 backdrop-blur-2xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ${
+          telemetryOpen ? "pr-4 sm:pr-6 md:pr-8 lg:pr-[410px]" : "pr-4 sm:pr-20 md:pr-24"
         }`}
       >
         {/* Logo & Identity */}
-        <div className="flex items-center gap-3.5">
-          <div className="relative group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 via-obsidian-900 to-core-violet/20 border border-core-cyan/40 flex items-center justify-center text-core-cyan font-mono font-bold text-sm shadow-[0_0_20px_rgba(56,189,248,0.25)] group-hover:border-core-cyan transition-all">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+          <div className="relative group shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 via-obsidian-900 to-core-violet/20 border border-core-cyan/40 flex items-center justify-center text-core-cyan font-mono font-bold text-sm shadow-[0_0_20px_rgba(56,189,248,0.25)] group-hover:border-core-cyan transition-all">
               P
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-core-cyan shadow-[0_0_6px_#38bdf8]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="font-bold text-sm tracking-wider font-mono text-white flex items-center gap-1.5">
                 PROSIS
                 <span className="text-core-cyan font-light">IT</span>
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 text-core-cyan border border-core-cyan/30 font-semibold tracking-wide">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 text-core-cyan border border-core-cyan/30 font-semibold tracking-wide hidden xs:inline-block">
                 SYS.v2.4
               </span>
             </div>
@@ -278,8 +281,9 @@ export default function ProsisOSPrimaryInterface() {
           </div>
         </div>
 
-        {/* Connection Status & Active Workspace */}
-        <div className="flex items-center gap-2 sm:gap-3.5">
+        {/* Desktop Nav — hidden on mobile */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-3.5">
+          {/* Workspace Status */}
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud text-xs font-mono text-gray-300 border-white/10 shadow-sm">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -288,7 +292,7 @@ export default function ProsisOSPrimaryInterface() {
                   : "bg-core-emerald shadow-[0_0_10px_#34d399] animate-pulse"
               }`}
             />
-            <span className="hidden sm:inline text-gray-400 text-[11px] tracking-wider">ORBIT ·</span>
+            <span className="hidden md:inline text-gray-400 text-[11px] tracking-wider">ORBIT ·</span>
             <span className="text-white font-medium capitalize text-xs">
               {currentWorkspace === "prosis" ? "Prosis OS Core" : `${currentWorkspace} Workspace`}
             </span>
@@ -302,27 +306,27 @@ export default function ProsisOSPrimaryInterface() {
             )}
           </div>
 
-          {/* Product Hub Button ("My Products") */}
+          {/* Product Hub */}
           <button
             onClick={() => setProductHubOpen(true)}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-core-cyan/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
             aria-label="Open Product Hub"
           >
             <Layers className="w-3.5 h-3.5 text-core-cyan group-hover:drop-shadow-[0_0_6px_#38bdf8] transition-all" />
-            <span className="hidden sm:inline">Products ({products.length})</span>
+            <span className="hidden md:inline">Products ({products.length})</span>
           </button>
 
-          {/* Memory Intelligence Manager Button */}
+          {/* Memory Manager */}
           <button
             onClick={() => setMemoryModalOpen(true)}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-purple-400/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
             aria-label="Open Memory Manager"
           >
             <Brain className="w-3.5 h-3.5 text-core-violet group-hover:drop-shadow-[0_0_6px_#818cf8] transition-all" />
-            <span className="hidden sm:inline">Matrix ({memories.length})</span>
+            <span className="hidden md:inline">Matrix ({memories.length})</span>
           </button>
 
-          {/* GitHub Repositories Knowledge Hub */}
+          {/* Repos */}
           <button
             onClick={() => setRepositoriesModalOpen(true)}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-emerald-400/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
@@ -330,10 +334,10 @@ export default function ProsisOSPrimaryInterface() {
             title="Connected Codebases & GitHub Repositories"
           >
             <Github className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-all" />
-            <span className="hidden sm:inline">Repos</span>
+            <span className="hidden md:inline">Repos</span>
           </button>
 
-          {/* Telemetry / Memory Dock Toggle */}
+          {/* Telemetry Dock */}
           <button
             onClick={() => setTelemetryOpen(!telemetryOpen)}
             className="p-2.5 rounded-full surface-hud hover:border-white/20 text-gray-400 hover:text-white transition-all"
@@ -343,7 +347,7 @@ export default function ProsisOSPrimaryInterface() {
             <SlidersHorizontal className="w-4 h-4" />
           </button>
 
-          {/* System Control & Governance Settings Button */}
+          {/* Settings */}
           <button
             onClick={() => setSystemSettingsOpen(true)}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-hud hover:border-core-cyan/40 text-xs font-mono text-gray-300 hover:text-white transition-all active:scale-95 group"
@@ -351,10 +355,10 @@ export default function ProsisOSPrimaryInterface() {
             title="System Settings & Governance Control"
           >
             <Sliders className="w-3.5 h-3.5 text-core-cyan group-hover:rotate-45 transition-all" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden md:inline">Settings</span>
           </button>
 
-          {/* Active Operator Profile (Clickable to open System Settings) */}
+          {/* Operator Avatar */}
           {session && (
             <button
               onClick={() => setSystemSettingsOpen(true)}
@@ -377,7 +381,138 @@ export default function ProsisOSPrimaryInterface() {
             </button>
           )}
         </div>
+
+        {/* Mobile Right Controls — visible only on mobile */}
+        <div className="flex sm:hidden items-center gap-2">
+          {/* Workspace pill (compact) */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full surface-hud text-[11px] font-mono text-gray-300 border-white/10">
+            <span
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                currentWorkspace === "prosis"
+                  ? "bg-core-cyan animate-pulse"
+                  : "bg-core-emerald animate-pulse"
+              }`}
+            />
+            <span className="text-white font-medium capitalize truncate max-w-[90px]">
+              {currentWorkspace === "prosis" ? "Core" : currentWorkspace}
+            </span>
+            {currentWorkspace !== "prosis" && (
+              <button
+                onClick={() => setCurrentWorkspace("prosis")}
+                className="text-[10px] text-core-cyan font-mono shrink-0"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Mobile hamburger menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl surface-hud text-gray-300 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            aria-label="Open navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />}
+          </button>
+        </div>
       </header>
+
+      {/* MOBILE MENU OVERLAY — Bottom Sheet */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-[35] sm:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="absolute bottom-0 left-0 right-0 bg-obsidian-975 border-t border-white/10 rounded-t-3xl p-5 space-y-3 shadow-[0_-20px_60px_rgba(0,0,0,0.8)] animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
+
+            {/* Operator identity */}
+            {session && (
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/10 mb-2">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-sm font-mono font-bold text-core-cyan shrink-0">
+                  {session.user.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-core-emerald animate-pulse" />
+                    {session.user.name}
+                  </div>
+                  <div className="text-[10px] font-mono text-core-cyan/80 uppercase tracking-wider">
+                    {session.user.role} · {session.organization.name}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Nav Actions Grid */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => { setProductHubOpen(true); setMobileMenuOpen(false); }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl surface-hud border border-white/10 hover:border-core-cyan/40 text-left active:scale-95 transition-all"
+              >
+                <Layers className="w-4 h-4 text-core-cyan shrink-0" />
+                <div>
+                  <div className="text-xs font-mono font-semibold text-white">Products</div>
+                  <div className="text-[10px] text-gray-400">{products.length} connected</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setMemoryModalOpen(true); setMobileMenuOpen(false); }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl surface-hud border border-white/10 hover:border-core-violet/40 text-left active:scale-95 transition-all"
+              >
+                <Brain className="w-4 h-4 text-core-violet shrink-0" />
+                <div>
+                  <div className="text-xs font-mono font-semibold text-white">Memory</div>
+                  <div className="text-[10px] text-gray-400">{memories.length} records</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setRepositoriesModalOpen(true); setMobileMenuOpen(false); }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl surface-hud border border-white/10 hover:border-emerald-400/40 text-left active:scale-95 transition-all"
+              >
+                <Github className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="text-xs font-mono font-semibold text-white">Repos</div>
+                  <div className="text-[10px] text-gray-400">GitHub knowledge</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setTelemetryOpen(true); setMobileMenuOpen(false); }}
+                className="flex items-center gap-3 p-3.5 rounded-2xl surface-hud border border-white/10 hover:border-white/20 text-left active:scale-95 transition-all"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-gray-300 shrink-0" />
+                <div>
+                  <div className="text-xs font-mono font-semibold text-white">Telemetry</div>
+                  <div className="text-[10px] text-gray-400">Audit & memory</div>
+                </div>
+              </button>
+            </div>
+
+            {/* Settings full-width */}
+            <button
+              onClick={() => { setSystemSettingsOpen(true); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-core-cyan/5 border border-core-cyan/20 hover:border-core-cyan/40 text-left active:scale-95 transition-all"
+            >
+              <Sliders className="w-4 h-4 text-core-cyan shrink-0" />
+              <div>
+                <div className="text-xs font-mono font-semibold text-white">System Settings</div>
+                <div className="text-[10px] text-gray-400">Autonomy, AI models, governance</div>
+              </div>
+            </button>
+
+            {/* Bottom safe area */}
+            <div className="h-2" />
+          </div>
+        </div>
+      )}
 
       {/* PRIMARY SCREEN CANVAS */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pt-6 sm:pt-10 pb-36 max-w-6xl mx-auto w-full">
@@ -484,7 +619,7 @@ export default function ProsisOSPrimaryInterface() {
                 {/* Orbital Ring 1 (Dashed Cyan with satellite nodes) */}
                 <div
                   className={`absolute rounded-full border border-core-cyan/25 animate-orbit pointer-events-none transition-all duration-700 ${
-                    hasTurns ? "w-[240px] h-[240px]" : "w-[340px] h-[340px]"
+                    hasTurns ? "w-[160px] h-[160px] sm:w-[240px] sm:h-[240px]" : "w-[220px] h-[220px] sm:w-[340px] sm:h-[340px]"
                   }`}
                   style={{
                     borderStyle: "dashed",
@@ -498,7 +633,7 @@ export default function ProsisOSPrimaryInterface() {
                 {/* Orbital Ring 2 (Outer reverse rotation with emerald node) */}
                 <div
                   className={`absolute rounded-full border border-white/[0.07] animate-orbit-reverse pointer-events-none transition-all duration-700 ${
-                    hasTurns ? "w-[280px] h-[280px]" : "w-[390px] h-[390px]"
+                    hasTurns ? "w-[190px] h-[190px] sm:w-[280px] sm:h-[280px]" : "w-[255px] h-[255px] sm:w-[390px] sm:h-[390px]"
                   }`}
                 >
                   <span className="absolute top-1/2 -left-1 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-core-emerald shadow-[0_0_8px_#34d399]" />
@@ -507,17 +642,18 @@ export default function ProsisOSPrimaryInterface() {
                 {/* Radar Ambient Pulse Ring */}
                 <div
                   className={`absolute rounded-full bg-core-cyan/[0.02] border border-core-cyan/10 animate-radar-ping pointer-events-none ${
-                    hasTurns ? "w-[210px] h-[210px]" : "w-[300px] h-[300px]"
+                    hasTurns ? "w-[140px] h-[140px] sm:w-[210px] sm:h-[210px]" : "w-[195px] h-[195px] sm:w-[300px] sm:h-[300px]"
                   }`}
                 />
 
                 <AICoreVisual
                   state={voice.voiceState}
                   audioLevel={voice.amplitude}
-                  size={hasTurns ? 200 : 280}
+                  size={hasTurns ? 120 : 160}
                   onClick={() => {
                     voice.toggleVoice();
                   }}
+                  className="sm:scale-[1.67] sm:origin-center"
                 />
               </div>
 
@@ -681,12 +817,12 @@ export default function ProsisOSPrimaryInterface() {
       </main>
 
       {/* FLOATING COMMAND OMNIBAR */}
-      <div className="fixed bottom-6 inset-x-0 z-30 pointer-events-auto px-4">
-        <div className="max-w-2xl mx-auto surface-glass-elevated border border-white/10 hover:border-core-cyan/30 rounded-full p-2 pl-3 shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(0,240,255,0.06)] flex items-center justify-between gap-3 backdrop-blur-2xl transition-all duration-300">
+      <div className="fixed bottom-4 sm:bottom-6 inset-x-0 z-30 pointer-events-auto px-3 sm:px-4">
+        <div className="max-w-2xl mx-auto surface-glass-elevated border border-white/10 hover:border-core-cyan/30 rounded-full p-1.5 sm:p-2 pl-2 sm:pl-3 shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(0,240,255,0.06)] flex items-center justify-between gap-2 sm:gap-3 backdrop-blur-2xl transition-all duration-300">
           {/* Attachment Icon */}
           <button
             onClick={() => {}}
-            className="p-2 rounded-full text-gray-400 hover:text-core-cyan hover:bg-white/5 transition-all"
+            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-core-cyan hover:bg-white/5 transition-all shrink-0"
             title="Attach documentation or knowledge file"
             aria-label="Attach File"
           >
@@ -696,28 +832,28 @@ export default function ProsisOSPrimaryInterface() {
           {/* Primary Text Directive Input */}
           <form
             onSubmit={handleFormSubmit}
-            className="flex-1 flex items-center"
+            className="flex-1 flex items-center min-w-0"
           >
             <input
               ref={inputRef}
               type="text"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
-              placeholder="Direct Prosis or speak naturally..."
+              placeholder="Direct Prosis..."
               disabled={isProcessing}
-              className="w-full bg-transparent text-xs sm:text-sm text-gray-100 placeholder-gray-500 focus:outline-none px-2 font-sans selection:bg-core-cyan/30"
+              className="w-full bg-transparent text-xs sm:text-sm text-gray-100 placeholder-gray-500 focus:outline-none px-1.5 sm:px-2 font-sans selection:bg-core-cyan/30 min-w-0"
               aria-label="Direct Prosis"
             />
-            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-500 border border-white/10 bg-white/[0.02]">
+            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-500 border border-white/10 bg-white/[0.02] shrink-0">
               ⌘K
             </span>
           </form>
 
-          {/* Real-time Voice Duplex Interaction (Microphone with amplitude ring & barge-in) */}
-          <div className="flex items-center gap-2 pr-1">
+          {/* Real-time Voice Duplex Interaction */}
+          <div className="flex items-center gap-1.5 sm:gap-2 pr-0.5 sm:pr-1 shrink-0">
             <button
               onClick={() => voice.toggleVoice()}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-all ${
                 voice.isVoiceActive
                   ? "bg-core-cyan/20 text-core-cyan border border-core-cyan/50 shadow-[0_0_20px_rgba(0,240,255,0.4)]"
                   : "surface-glass text-gray-400 hover:text-gray-200 border-white/10 hover:border-white/20"
@@ -731,12 +867,12 @@ export default function ProsisOSPrimaryInterface() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-core-cyan opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-core-cyan"></span>
                   </span>
-                  <span className="tracking-wide">LIVE</span>
+                  <span className="tracking-wide hidden sm:inline">LIVE</span>
                 </>
               ) : (
                 <>
                   <Mic className="w-3.5 h-3.5" />
-                  <span className="tracking-wide">VOICE</span>
+                  <span className="tracking-wide hidden sm:inline">VOICE</span>
                 </>
               )}
             </button>
@@ -750,7 +886,7 @@ export default function ProsisOSPrimaryInterface() {
                 sendDirective(text, "web");
               }}
               disabled={!commandInput.trim() || isProcessing}
-              className="p-2.5 rounded-full bg-gradient-to-r from-core-cyan to-blue-500 text-obsidian-950 font-bold hover:brightness-110 disabled:opacity-25 disabled:pointer-events-none transition-all active:scale-95 shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+              className="p-2 sm:p-2.5 rounded-full bg-gradient-to-r from-core-cyan to-blue-500 text-obsidian-950 font-bold hover:brightness-110 disabled:opacity-25 disabled:pointer-events-none transition-all active:scale-95 shadow-[0_0_15px_rgba(0,240,255,0.3)]"
               aria-label="Dispatch Directive"
             >
               <Send className="w-3.5 h-3.5" />

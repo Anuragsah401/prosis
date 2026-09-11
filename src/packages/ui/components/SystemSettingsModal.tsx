@@ -285,28 +285,28 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-core-cyan via-core-violet to-core-cyan shadow-[0_0_12px_#00f0ff]" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-obsidian-950/80">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_15px_rgba(0,240,255,0.25)]">
+        <div className="flex items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-obsidian-950/80 gap-3">
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-core-cyan/20 to-core-violet/20 border border-core-cyan/30 flex items-center justify-center text-core-cyan shadow-[0_0_15px_rgba(0,240,255,0.25)] shrink-0">
               <Sliders className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold font-mono tracking-wide text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-xs sm:text-sm font-semibold font-mono tracking-wide text-white">
                   SYSTEM CONTROL MATRIX
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 text-core-cyan border border-core-cyan/30 font-semibold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-core-cyan/10 text-core-cyan border border-core-cyan/30 font-semibold shrink-0">
                   PROSIS.OS v2.4
                 </span>
               </div>
-              <p className="text-[11px] text-gray-400 font-sans">
+              <p className="text-[11px] text-gray-400 font-sans hidden sm:block mt-0.5">
                 Global governance, autonomy level, cognitive models, surveillance &amp; zero-trust security.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+            className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all shrink-0"
             aria-label="Close settings"
           >
             <X className="w-4 h-4" />
@@ -915,7 +915,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="px-6 py-4 border-t border-white/10 bg-obsidian-950/90 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-white/10 bg-obsidian-950/90 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
@@ -935,7 +935,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2 rounded-xl text-xs font-mono font-semibold text-black bg-gradient-to-r from-core-cyan via-core-emerald to-core-cyan hover:opacity-95 shadow-[0_0_25px_rgba(0,240,255,0.35)] transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-2 rounded-xl text-xs font-mono font-semibold text-black bg-gradient-to-r from-core-cyan via-core-emerald to-core-cyan hover:opacity-95 shadow-[0_0_25px_rgba(0,240,255,0.35)] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSaving ? (
                 <>
@@ -945,7 +945,7 @@ export const SystemSettingsModal: React.FC<SystemSettingsModalProps> = ({
               ) : (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Apply &amp; Enforce Configuration</span>
+                  <span>Apply &amp; Enforce</span>
                 </>
               )}
             </button>
