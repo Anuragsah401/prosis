@@ -156,8 +156,8 @@ function buildRealtimeSystemInstruction(): string {
       repos
         .map((r) => {
           const bp = r.blueprint;
-          const endpoints = bp.apiEndpoints.slice(0, 6).map((e) => `${e.method} ${e.path}`).join(", ");
-          const models = bp.domainModels.slice(0, 6).map((m) => m.name).join(", ");
+          const endpoints = bp.apiEndpoints.slice(0, 15).map((e) => `${e.method} ${e.path}`).join(", ");
+          const models = bp.domainModels.slice(0, 10).map((m) => m.name).join(", ");
           return `• Repository "${r.name}" (${r.repoUrl}, branch: ${r.branch}):
   - Overview: ${bp.overview || r.description}
   - Tech Stack: ${bp.techStack.join(", ")}

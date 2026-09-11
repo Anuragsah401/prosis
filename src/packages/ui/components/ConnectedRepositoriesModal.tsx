@@ -256,7 +256,7 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
               <div className="md:col-span-8 relative">
                 <input
                   type="text"
-                  placeholder="https://github.com/owner/repository (e.g. seatbooking-core)"
+                  placeholder="https://github.com/Anuragsah401/seatbooking"
                   value={repoUrlInput}
                   onChange={(e) => setRepoUrlInput(e.target.value)}
                   disabled={isConnecting}
@@ -317,13 +317,13 @@ export const ConnectedRepositoriesModal: React.FC<ConnectedRepositoriesModalProp
               <span className="text-[10px] font-mono text-gray-500 uppercase">Quick Presets:</span>
               <button
                 onClick={() => {
-                  setRepoUrlInput("https://github.com/prosis-ecosystem/seatbooking-core");
-                  handleConnect("https://github.com/prosis-ecosystem/seatbooking-core");
+                  setRepoUrlInput("https://github.com/Anuragsah401/seatbooking");
+                  handleConnect("https://github.com/Anuragsah401/seatbooking");
                 }}
                 disabled={isConnecting}
                 className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-core-cyan/15 text-gray-300 hover:text-core-cyan border border-white/10 hover:border-core-cyan/30 text-[11px] font-mono flex items-center gap-1.5 transition-all"
               >
-                <span>🪑 Seatbooking Core</span>
+                <span>🪑 Seatbooking (Anuragsah401)</span>
               </button>
 
               <button

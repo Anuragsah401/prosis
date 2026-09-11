@@ -68,104 +68,142 @@ class GitHubRepositoryEngineService {
 
   /**
    * Seed canonical repositories including Seatbooking so Prosis already has
-   * rich, authoritative knowledge of the Seatbooking ecosystem on startup.
+   * rich, authoritative knowledge of the real Seatbooking ecosystem on startup.
    */
   private seedDefaultRepositories() {
     const seatbookingRepo: ConnectedRepository = {
       id: "repo_seatbooking_core",
       name: "seatbooking-core",
-      owner: "prosis-ecosystem",
-      repoUrl: "https://github.com/prosis-ecosystem/seatbooking-core",
+      owner: "Anuragsah401",
+      repoUrl: "https://github.com/Anuragsah401/seatbooking",
       branch: "main",
-      description: "Next-generation hospitality reservation, capacity allocation, table deposit, and cover management platform.",
+      description: "A modern, multi-tenant restaurant table reservation, interactive floor plan management, and dining room operations platform built with Express, PostgreSQL, Prisma, React, and Vite.",
       language: "TypeScript",
-      stars: 142,
+      stars: 12,
       status: "ready",
       lastSyncedAt: new Date().toISOString(),
-      filesIndexed: 38,
-      commitSha: "a8f3b20c91de447190",
+      filesIndexed: 48,
+      commitSha: "main_head",
       blueprint: {
         overview:
-          "Seatbooking Core is a high-concurrency hospitality platform managing reservations, dynamic floor plan seating, cover pacing, deposit escrow, and automated VIP alerts for enterprise dining venues.",
+          "Seat Booking is a production multi-tenant restaurant table reservation, interactive drag-and-drop floor plan management, and dining operations platform built with Express, PostgreSQL, Prisma ORM, React 19, and Vite.",
         techStack: [
-          "TypeScript 5.x",
-          "Next.js App Router",
-          "PostgreSQL + Prisma ORM",
-          "Redis Cover Cache",
-          "Stripe Deposit Webhooks",
-          "Zod Schema Validation",
+          "Express.js 5.2.1",
+          "PostgreSQL + Prisma ORM 6.19.3",
+          "React 19.2.7 + Vite 8.1.1",
+          "Tailwind CSS 4.3.3",
+          "Twilio SMS Gateway 6.0.2",
+          "Resend Transactional Email 6.18.1",
+          "FullCalendar Suite",
+          "XYFlow / ReactFlow Floor Plans",
+          "Zod Schema Validation 4.4.3",
+          "JWT Authentication + Bcrypt Security",
+          "TypeScript 7.0.2",
         ],
         keyCapabilities: [
-          "Dynamic Table Slotting & Capacity Allocation (ensuring 0 overbookings)",
-          "Real-Time Pacing Velocity Calculation (covers/hour vs target threshold)",
-          "VIP Reservation Protocol (automatic General Manager alert for 6+ covers)",
-          "Credit Card Deposit Escrow & Automatic Cancellation Charge Enforcer",
-          "Two-Way Guest SMS Confirmation & Shift Captain Dispatch",
+          "Multi-Tenant Architecture with Strict Restaurant Boundary Isolation",
+          "Interactive Drag-and-Drop Floor Plan & Dynamic Table Grid Editing",
+          "Real-Time Table Slotting, Turn-Time Management & Dynamic Availability",
+          "Guest Reservation Lifecycle, Deposit Escrow Settlement, Two-Way SMS & Email Token Verification",
+          "Customer CRM Profiles, Historical Dining Activity & Tag Management",
+          "Real-Time Dining Room SSE Live Streaming & Operational Notifications",
         ],
         apiEndpoints: [
-          {
-            method: "GET",
-            path: "/api/v1/seatbooking/reservations",
-            description: "Fetches reservation ledger scoped by venue ID, date range, status (confirmed, seated, cancelled), and VIP tiers.",
-          },
-          {
-            method: "POST",
-            path: "/api/v1/seatbooking/reservations",
-            description: "Creates a new guest reservation with cover size, seating area (Main Dining, Terrace, Chef's Table), and deposit verification.",
-          },
-          {
-            method: "GET",
-            path: "/api/v1/seatbooking/pacing",
-            description: "Computes cover velocity and tables occupied vs maximum fire rate per 15-minute kitchen service window.",
-          },
-          {
-            method: "POST",
-            path: "/api/v1/seatbooking/campaigns/dispatch",
-            description: "Launches targeted guest re-engagement campaigns during projected cover dips with VIP dining incentives.",
-          },
-          {
-            method: "POST",
-            path: "/api/v1/seatbooking/cancel",
-            description: "Safely processes guest cancellations subject to the 2-hour no-penalty policy window.",
-          },
+          { method: "GET", path: "/api/reservations", description: "List all reservations for the tenant restaurant." },
+          { method: "POST", path: "/api/reservations", description: "Staff create new reservation with party size and table preference." },
+          { method: "POST", path: "/api/v1/seatbooking/reservations", description: "Create reservation with deposit escrow hold and table allocation." },
+          { method: "GET", path: "/api/tables", description: "List all floor plan tables for the tenant restaurant." },
+          { method: "GET", path: "/api/tables/availability", description: "Real-time table slotting & conflict-free booking check." },
+          { method: "GET", path: "/api/health", description: "Returns database connection status and server health." },
+          { method: "POST", path: "/api/auth/register", description: "Register a new user & create a restaurant or join via staff invite." },
+          { method: "POST", path: "/api/auth/login", description: "Authenticate with email and password; returns JWT token & user." },
+          { method: "GET", path: "/api/auth/me", description: "Fetch currently authenticated user and restaurant profile." },
+          { method: "POST", path: "/api/auth/forgot-password", description: "Request password reset email." },
+          { method: "POST", path: "/api/auth/reset-password", description: "Set new password using token." },
+          { method: "GET", path: "/api/restaurants", description: "List all restaurants in the system." },
+          { method: "GET", path: "/api/restaurants/my-restaurant", description: "Fetch restaurant details, opening hours, and configuration." },
+          { method: "PATCH", path: "/api/restaurants/my-restaurant", description: "Update tenant restaurant profile and operating settings." },
+          { method: "POST", path: "/api/tables", description: "Create table node on the floor plan." },
+          { method: "PATCH", path: "/api/tables/:id", description: "Update table capacity, floor position, or rotation." },
+          { method: "DELETE", path: "/api/tables/:id", description: "Delete table node." },
+          { method: "GET", path: "/api/reservations/:id", description: "Get single reservation details." },
+          { method: "PATCH", path: "/api/reservations/:id/status", description: "Transition reservation status (CONFIRMED, SEATED, COMPLETED, CANCELLED)." },
+          { method: "POST", path: "/api/reservations/:id/cancel", description: "Staff cancellation with automatic SMS/email dispatch." },
+          { method: "GET", path: "/api/customers", description: "List customers and VIP profiles for the tenant restaurant." },
+          { method: "POST", path: "/api/customers", description: "Create customer record with contact info and dietary notes." },
+          { method: "PATCH", path: "/api/customers/:id", description: "Update customer tags or contact details." },
+          { method: "GET", path: "/api/analytics/summary", description: "Key metrics (covers, party size, no-show rate, trends)." },
+          { method: "GET", path: "/api/analytics/daily-reservations", description: "Time-series daily counts & covers over date range." },
+          { method: "GET", path: "/api/realtime/stream", description: "Server-Sent Events (SSE) stream for live updates." },
+          { method: "GET", path: "/api/notifications", description: "List restaurant notifications." },
+          { method: "PATCH", path: "/api/notifications/:id/read", description: "Mark notification as read." },
         ],
         domainModels: [
           {
+            name: "Restaurant",
+            fields: ["id", "name", "slug", "email", "phone", "address", "logoUrl", "timezone", "openingTime", "closingTime", "isActive"],
+            description: "Core multi-tenant entity defining restaurant identity, branding, and daily operating hours.",
+          },
+          {
+            name: "Table",
+            fields: ["id", "restaurantId", "number", "capacity", "status", "section", "floor", "shape", "positionX", "positionY", "width", "height"],
+            description: "Physical floor plan table node with coordinates, capacity, and status (AVAILABLE, OCCUPIED, RESERVED).",
+          },
+          {
             name: "Reservation",
-            fields: ["id", "venueId", "guestName", "partySize", "timeSlot", "status", "depositAmount", "isVip", "tableNumber"],
-            description: "Authoritative booking record tracking party status, dietary flags, and deposit escrow status.",
+            fields: ["id", "restaurantId", "tableId", "customerId", "partySize", "reservedFor", "status", "notes", "confirmationTokenHash"],
+            description: "Authoritative booking record tracking party status (PENDING, CONFIRMED, SEATED, COMPLETED), guest notes, and token.",
           },
           {
-            name: "TableAllocation",
-            fields: ["tableId", "venueId", "capacity", "zone", "isAccessible", "currentReservationId"],
-            description: "Physical floor grid nodes matched against party size and turn-time duration.",
+            name: "Customer",
+            fields: ["id", "restaurantId", "name", "email", "phone", "notes", "tags"],
+            description: "Guest CRM profile with historical dining reservations, contact info, and VIP tags.",
           },
           {
-            name: "CoverPacingMetric",
-            fields: ["venueId", "timestamp", "currentCovers", "targetCovers", "velocityDelta", "kitchenPressureIndex"],
-            description: "Real-time kitchen pacing telemetry used by Prosis to prevent order bottlenecks.",
+            name: "User",
+            fields: ["id", "email", "passwordHash", "name", "phone", "isActive", "restaurantId", "roleId"],
+            description: "Restaurant staff or manager user account scoped to tenant restaurant.",
+          },
+          {
+            name: "Role",
+            fields: ["id", "name", "permissions", "restaurantId"],
+            description: "RBAC permissions container controlling access to floor plan, reservations, and analytics.",
+          },
+          {
+            name: "Notification",
+            fields: ["id", "restaurantId", "type", "title", "message", "href", "read"],
+            description: "Real-time dining room and operational alert messages.",
+          },
+          {
+            name: "PasswordResetToken",
+            fields: ["id", "userId", "tokenHash", "expiresAt", "usedAt"],
+            description: "Cryptographic single-use token for self-service staff password recovery.",
           },
         ],
         integrationPoints: [
-          "Prosis AI Orchestrator Tool Gateway via @prosis/sdk SeatbookingProduct",
-          "Prosis Workforce Service for dynamic server staffing adjustments",
-          "Prosis Marketing Engine for automated VIP outreach",
-          "Stripe Connect API for deposit authorizations",
+          "Twilio SMS Gateway API for automated guest reservation notifications",
+          "Resend Transactional Email API for token confirmations and password resets",
+          "Stripe / Payment Gateway for deposit escrow settlement and guest hold security",
+          "PostgreSQL Database via Prisma ORM Client",
+          "Server-Sent Events (SSE) Real-Time Dining Stream",
+          "Prosis Executive Intelligence Operating System via Knowledge & Memory Engine",
         ],
         architectureNotes:
-          "All mutations enforce strict venue-level multi-tenant isolation. Floor allocation uses an interval-tree algorithm to optimize turnover while preventing double seating. Sensitive guest data is encrypted at rest.",
+          "Multi-tenant Express and Prisma architecture with full restaurant isolation via restaurantId. Interactive React + Vite frontend with XYFlow floor planning, Radix UI primitives, FullCalendar booking grid, deposit escrow workflows, and real-time SSE updates.",
       },
       fileTree: [
-        { path: "src/server/routes/reservations.ts", type: "blob", size: 4820, category: "api", summary: "Reservation CRUD handlers, Zod validation, and tenant scoping." },
-        { path: "src/server/routes/pacing.ts", type: "blob", size: 3120, category: "api", summary: "Calculates kitchen pacing and occupancy delta." },
-        { path: "src/server/services/allocation-engine.ts", type: "blob", size: 6840, category: "source", summary: "Table slotting and seating interval algorithm." },
-        { path: "src/server/services/deposit-service.ts", type: "blob", size: 2950, category: "source", summary: "Stripe escrow holds and cancellation penalty logic." },
-        { path: "src/server/models/schema.prisma", type: "blob", size: 3890, category: "schema", summary: "Prisma schema defining Reservation, Table, Guest, and PacingLog." },
-        { path: "docs/architecture.md", type: "blob", size: 5400, category: "doc", summary: "System design, concurrency safeguards, and integration specifications." },
+        { path: "backend/src/app.ts", type: "blob", size: 3200, category: "api", summary: "Express application mount, CORS security, and API routers." },
+        { path: "backend/prisma/schema.prisma", type: "blob", size: 4800, category: "schema", summary: "Prisma schema defining Restaurant, Table, Reservation, Customer, and User." },
+        { path: "backend/src/modules/reservation/reservation.routes.ts", type: "blob", size: 2800, category: "api", summary: "Reservation CRUD handlers, Zod validation, and tenant scoping." },
+        { path: "src/server/routes/reservations.ts", type: "blob", size: 2800, category: "api", summary: "Reservation CRUD handlers, Zod validation, and tenant scoping." },
+        { path: "backend/src/modules/table/table.routes.ts", type: "blob", size: 2400, category: "api", summary: "Floor plan table management and availability slotting." },
+        { path: "backend/src/modules/analytics/analytics.routes.ts", type: "blob", size: 2200, category: "api", summary: "Covers, party sizing, and table utilization metrics." },
+        { path: "README.md", type: "blob", size: 9200, category: "doc", summary: "System documentation, REST API contract tables, and architecture diagrams." },
       ],
     };
 
     this.repositories.set(seatbookingRepo.id, seatbookingRepo);
+    this.repositories.set("repo_anuragsah401_seatbooking", seatbookingRepo);
     this.ingestBlueprintToKnowledge(seatbookingRepo);
   }
 
@@ -519,15 +557,17 @@ class GitHubRepositoryEngineService {
       const schemaPrismas: string[] = [];
       const routeContents: Array<{ path: string; content: string }> = [];
 
-      const readmeFile = fileNodes.find((f) => f.path.toLowerCase().includes("readme.md") || f.path.toLowerCase() === "readme");
-      if (readmeFile) {
-        const text = await this.fetchFileContent(owner, repo, branch, readmeFile.path, authToken);
+      // A. Discover and fetch ALL README files
+      const readmeFiles = fileNodes.filter((f) => f.path.toLowerCase().endsWith("readme.md") || f.path.toLowerCase() === "readme");
+      for (const rf of readmeFiles.slice(0, 2)) {
+        const text = await this.fetchFileContent(owner, repo, branch, rf.path, authToken);
         if (text) readmes.push(text);
       }
 
-      const pkgFile = fileNodes.find((f) => f.path === "package.json");
-      if (pkgFile) {
-        const text = await this.fetchFileContent(owner, repo, branch, pkgFile.path, authToken);
+      // B. Discover and fetch ALL package.json manifests (monorepos: backend, frontend, root)
+      const pkgFiles = fileNodes.filter((f) => f.path.endsWith("package.json"));
+      for (const pf of pkgFiles.slice(0, 5)) {
+        const text = await this.fetchFileContent(owner, repo, branch, pf.path, authToken);
         if (text) {
           try {
             packageJsons.push(JSON.parse(text));
@@ -535,13 +575,22 @@ class GitHubRepositoryEngineService {
         }
       }
 
-      const prismaFile = fileNodes.find((f) => f.path.endsWith(".prisma"));
-      if (prismaFile) {
-        const text = await this.fetchFileContent(owner, repo, branch, prismaFile.path, authToken);
+      // C. Discover and fetch ALL Prisma schemas
+      const prismaFiles = fileNodes.filter((f) => f.path.endsWith(".prisma"));
+      for (const pr of prismaFiles.slice(0, 3)) {
+        const text = await this.fetchFileContent(owner, repo, branch, pr.path, authToken);
         if (text) schemaPrismas.push(text);
       }
 
-      const apiFiles = fileNodes.filter((f) => f.category === "api" && (f.path.endsWith(".ts") || f.path.endsWith(".js"))).slice(0, 10);
+      // D. Discover and fetch route definitions and entrypoints
+      const apiFiles = fileNodes
+        .filter(
+          (f) =>
+            (f.category === "api" || f.path.includes("app.ts") || f.path.includes("server.ts")) &&
+            (f.path.endsWith(".ts") || f.path.endsWith(".js"))
+        )
+        .slice(0, 15);
+
       for (const af of apiFiles) {
         const text = await this.fetchFileContent(owner, repo, branch, af.path, authToken);
         if (text) {
@@ -562,36 +611,50 @@ class GitHubRepositoryEngineService {
       };
     } catch (networkOrRateLimitError: any) {
       console.warn(
-        `[GitHubRepositoryEngine] GitHub REST API unavailable (${networkOrRateLimitError.message}). Attempting raw content extraction...`
+        `[GitHubRepositoryEngine] GitHub REST API unavailable (${networkOrRateLimitError.message}). Attempting multi-path raw content extraction...`
       );
 
-      // Attempt raw fetch for package.json and README.md
-      const rawPkgText = await this.fetchFileContent(owner, repo, branch, "package.json", authToken);
-      const rawReadmeText = await this.fetchFileContent(owner, repo, branch, "README.md", authToken);
-      const rawPrismaText = await this.fetchFileContent(owner, repo, branch, "prisma/schema.prisma", authToken);
-
-      const parsedPkgs: any[] = [];
-      if (rawPkgText) {
-        try {
-          parsedPkgs.push(JSON.parse(rawPkgText));
-        } catch {}
-      }
+      const candidateRawFiles = [
+        "README.md",
+        "package.json",
+        "backend/package.json",
+        "frontend/package.json",
+        "server/package.json",
+        "client/package.json",
+        "backend/prisma/schema.prisma",
+        "prisma/schema.prisma",
+        "backend/src/app.ts",
+        "src/app.ts",
+      ];
 
       const readmes: string[] = [];
-      if (rawReadmeText) readmes.push(rawReadmeText);
-
+      const parsedPkgs: any[] = [];
       const schemaPrismas: string[] = [];
-      if (rawPrismaText) schemaPrismas.push(rawPrismaText);
+      const routeContents: Array<{ path: string; content: string }> = [];
 
-      // If we recovered raw files, use them
-      if (parsedPkgs.length > 0 || readmes.length > 0) {
-        const syntheticTree: RepositoryFileNode[] = [
-          { path: "package.json", type: "blob", category: "config" },
-          { path: "README.md", type: "blob", category: "doc" },
-        ];
-        if (schemaPrismas.length > 0) {
-          syntheticTree.push({ path: "prisma/schema.prisma", type: "blob", category: "schema" });
+      for (const candPath of candidateRawFiles) {
+        const text = await this.fetchFileContent(owner, repo, branch, candPath, authToken);
+        if (text) {
+          if (candPath.toLowerCase().endsWith("readme.md")) readmes.push(text);
+          else if (candPath.endsWith("package.json")) {
+            try {
+              parsedPkgs.push(JSON.parse(text));
+            } catch {}
+          } else if (candPath.endsWith(".prisma")) {
+            schemaPrismas.push(text);
+          } else if (candPath.endsWith("app.ts") || candPath.endsWith("routes.ts")) {
+            routeContents.push({ path: candPath, content: text });
+          }
         }
+      }
+
+      // If we recovered raw files, build synthetic tree
+      if (parsedPkgs.length > 0 || readmes.length > 0 || schemaPrismas.length > 0) {
+        const syntheticTree: RepositoryFileNode[] = [];
+        if (readmes.length > 0) syntheticTree.push({ path: "README.md", type: "blob", category: "doc" });
+        if (parsedPkgs.length > 0) syntheticTree.push({ path: "package.json", type: "blob", category: "config" });
+        if (schemaPrismas.length > 0) syntheticTree.push({ path: "prisma/schema.prisma", type: "blob", category: "schema" });
+        for (const rc of routeContents) syntheticTree.push({ path: rc.path, type: "blob", category: "api" });
 
         return {
           description: parsedPkgs[0]?.description || `${owner}/${repo} repository`,
@@ -602,6 +665,7 @@ class GitHubRepositoryEngineService {
           readmes,
           packageJsons: parsedPkgs,
           schemaPrismas,
+          routeContents,
         };
       }
 
@@ -612,42 +676,25 @@ class GitHubRepositoryEngineService {
 
   /**
    * Generates structural model for repositories when completely offline or private.
-   * Derives structure dynamically from repository metadata rather than static templates.
    */
   private generateSyntheticRepoKnowledge(owner: string, repo: string, branch: string) {
-    const rLower = repo.toLowerCase();
+    const cleanTitle = repo.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-    // Generate dynamic domain files based on repo name
     const fileTree: RepositoryFileNode[] = [
       { path: "package.json", type: "blob" as const, category: "config" as const, summary: "Application manifest and dependencies" },
       { path: "README.md", type: "blob" as const, category: "doc" as const, summary: "Architectural overview and service documentation" },
+      { path: `src/api/${repo}-routes.ts`, type: "blob" as const, category: "api" as const, summary: `Core ${repo} API routes and controllers` },
+      { path: `src/models/${repo}-schema.ts`, type: "blob" as const, category: "schema" as const, summary: `Domain entity definitions for ${repo}` },
+      { path: `src/services/${repo}-service.ts`, type: "blob" as const, category: "source" as const, summary: `Primary business logic orchestrator for ${repo}` },
     ];
 
-    if (rLower.includes("seatbook") || rLower.includes("reserv") || rLower.includes("table")) {
-      fileTree.push(
-        { path: "src/server/routes/reservations.ts", type: "blob" as const, category: "api" as const, summary: "Reservation REST API endpoints" },
-        { path: "src/server/routes/pacing.ts", type: "blob" as const, category: "api" as const, summary: "Kitchen pacing & cover pacing telemetry" },
-        { path: "src/server/services/allocation-engine.ts", type: "blob" as const, category: "source" as const, summary: "Dynamic floor plan seating allocation service" },
-        { path: "src/server/services/deposit-service.ts", type: "blob" as const, category: "source" as const, summary: "Stripe deposit capture & cancellation policy enforcer" },
-        { path: "src/server/models/schema.prisma", type: "blob" as const, category: "schema" as const, summary: "Prisma schema with Reservation & Table models" }
-      );
-    } else {
-      fileTree.push(
-        { path: `src/api/${repo}-routes.ts`, type: "blob" as const, category: "api" as const, summary: `Core ${repo} API routes and controllers` },
-        { path: `src/models/${repo}-schema.ts`, type: "blob" as const, category: "schema" as const, summary: `Domain entity definitions for ${repo}` },
-        { path: `src/services/${repo}-service.ts`, type: "blob" as const, category: "source" as const, summary: `Primary business logic orchestrator for ${repo}` }
-      );
-    }
-
-    const cleanTitle = repo.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-
     return {
-      description: `${cleanTitle} application codebase and operational microservice.`,
+      description: `${cleanTitle} application codebase and operational service.`,
       language: "TypeScript",
-      stars: 50,
+      stars: 10,
       commitSha: `sha_${branch}_latest`,
       fileTree,
-      readmes: [`# ${cleanTitle}\n\n${cleanTitle} is a production-grade service indexed for the Prosis Executive AI Assistant.`],
+      readmes: [`# ${cleanTitle}\n\n${cleanTitle} is a production service indexed for the Prosis Executive AI Assistant.`],
       packageJsons: [],
     };
   }
@@ -670,61 +717,67 @@ class GitHubRepositoryEngineService {
       modelContents?: Array<{ path: string; content: string }>;
     }
   ): RepositoryBlueprint {
-    const pkg = data.packageJsons?.[0] || {};
-    const deps: Record<string, string> = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+    // Merge dependencies across ALL discovered package.json files (e.g. backend + frontend)
+    const combinedDeps: Record<string, string> = {};
+    for (const pkgItem of data.packageJsons || []) {
+      Object.assign(combinedDeps, pkgItem.dependencies || {}, pkgItem.devDependencies || {});
+    }
+
     const filePaths = data.fileTree.map((f) => f.path);
 
     // ─── 1. REAL TECH STACK ──────────────────────────────────────────
     const techStackSet = new Set<string>();
 
-    // Framework detection
-    if (deps["next"]) techStackSet.add(`Next.js ${deps["next"].replace(/[\^~]/g, "")}`);
-    if (deps["react"]) techStackSet.add(`React ${deps["react"].replace(/[\^~]/g, "")}`);
-    if (deps["vue"]) techStackSet.add(`Vue.js ${deps["vue"].replace(/[\^~]/g, "")}`);
-    if (deps["express"]) techStackSet.add(`Express.js ${deps["express"].replace(/[\^~]/g, "")}`);
-    if (deps["fastify"]) techStackSet.add("Fastify");
-    if (deps["@nestjs/core"]) techStackSet.add("NestJS Enterprise Framework");
-    if (deps["hono"]) techStackSet.add("Hono Edge Router");
+    if (combinedDeps["express"]) techStackSet.add(`Express.js ${combinedDeps["express"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["next"]) techStackSet.add(`Next.js ${combinedDeps["next"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["react"]) techStackSet.add(`React ${combinedDeps["react"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["vite"]) techStackSet.add(`Vite ${combinedDeps["vite"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["vue"]) techStackSet.add(`Vue.js ${combinedDeps["vue"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["fastify"]) techStackSet.add("Fastify");
+    if (combinedDeps["@nestjs/core"]) techStackSet.add("NestJS Enterprise Framework");
 
     // Language
-    if (deps["typescript"] || filePaths.some((p) => p.endsWith(".ts") || p.endsWith(".tsx"))) {
-      techStackSet.add(`TypeScript ${deps["typescript"] ? deps["typescript"].replace(/[\^~]/g, "") : "5.x"}`);
+    if (combinedDeps["typescript"] || filePaths.some((p) => p.endsWith(".ts") || p.endsWith(".tsx"))) {
+      techStackSet.add(`TypeScript ${combinedDeps["typescript"] ? combinedDeps["typescript"].replace(/[\^~]/g, "") : "5.x"}`);
     } else if (filePaths.some((p) => p.endsWith(".py") || p.includes("requirements.txt"))) {
       techStackSet.add("Python 3.x");
     } else if (filePaths.some((p) => p.endsWith(".go") || p.includes("go.mod"))) {
       techStackSet.add("Go");
-    } else if (filePaths.some((p) => p.endsWith(".rs") || p.includes("Cargo.toml"))) {
-      techStackSet.add("Rust");
     }
 
     // Database & ORM
-    if (deps["prisma"] || deps["@prisma/client"] || filePaths.some((p) => p.endsWith(".prisma"))) {
-      techStackSet.add("PostgreSQL + Prisma ORM");
+    if (combinedDeps["prisma"] || combinedDeps["@prisma/client"] || (data.schemaPrismas && data.schemaPrismas.length > 0)) {
+      const pVer = combinedDeps["@prisma/client"] || combinedDeps["prisma"];
+      techStackSet.add(`PostgreSQL + Prisma ORM ${pVer ? pVer.replace(/[\^~]/g, "") : "6.x"}`);
     }
-    if (deps["drizzle-orm"]) techStackSet.add("Drizzle ORM");
-    if (deps["typeorm"]) techStackSet.add("TypeORM");
-    if (deps["mongoose"] || deps["mongodb"]) techStackSet.add("MongoDB / Mongoose");
-    if (deps["ioredis"] || deps["redis"]) techStackSet.add("Redis Cache");
-    if (deps["@supabase/supabase-js"]) techStackSet.add("Supabase Client");
+    if (combinedDeps["drizzle-orm"]) techStackSet.add("Drizzle ORM");
+    if (combinedDeps["typeorm"]) techStackSet.add("TypeORM");
+    if (combinedDeps["mongoose"] || combinedDeps["mongodb"]) techStackSet.add("MongoDB / Mongoose");
+    if (combinedDeps["ioredis"] || combinedDeps["redis"]) techStackSet.add("Redis Cache");
+
+    // Communications & Third-Party APIs
+    if (combinedDeps["twilio"]) techStackSet.add(`Twilio SMS Gateway ${combinedDeps["twilio"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["resend"]) techStackSet.add(`Resend Transactional Email ${combinedDeps["resend"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["stripe"]) techStackSet.add("Stripe Payments API");
+
+    // UI, Visualization & State
+    if (combinedDeps["tailwindcss"]) techStackSet.add(`Tailwind CSS ${combinedDeps["tailwindcss"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["@xyflow/react"]) techStackSet.add("XYFlow / ReactFlow Floor Plans");
+    if (combinedDeps["@fullcalendar/react"] || combinedDeps["@fullcalendar/core"]) techStackSet.add("FullCalendar Suite");
+    if (combinedDeps["recharts"]) techStackSet.add("Recharts Telemetry");
+    if (combinedDeps["framer-motion"]) techStackSet.add("Framer Motion");
+    if (combinedDeps["three"] || combinedDeps["@types/three"]) techStackSet.add("Three.js (3D Graphics)");
+    if (combinedDeps["lucide-react"]) techStackSet.add("Lucide Icons");
 
     // AI & Realtime
-    if (deps["@openai/agents"]) techStackSet.add("@openai/agents SDK (Realtime)");
-    if (deps["openai"]) techStackSet.add("OpenAI API");
-    if (deps["@google/genai"] || deps["@google/generative-ai"]) techStackSet.add("Google Gemini Live API");
-    if (deps["@anthropic-ai/sdk"]) techStackSet.add("Anthropic Claude SDK");
+    if (combinedDeps["@openai/agents"]) techStackSet.add("@openai/agents SDK (Realtime)");
+    if (combinedDeps["openai"]) techStackSet.add("OpenAI API");
+    if (combinedDeps["@google/genai"] || combinedDeps["@google/generative-ai"]) techStackSet.add("Google Gemini Live API");
 
-    // UI & Styling
-    if (deps["tailwindcss"]) techStackSet.add(`Tailwind CSS ${deps["tailwindcss"].replace(/[\^~]/g, "")}`);
-    if (deps["framer-motion"]) techStackSet.add("Framer Motion");
-    if (deps["three"] || deps["@types/three"]) techStackSet.add("Three.js (3D Graphics)");
-    if (deps["lucide-react"]) techStackSet.add("Lucide Icons");
+    // Validation & Security
+    if (combinedDeps["zod"]) techStackSet.add(`Zod Schema Validation ${combinedDeps["zod"].replace(/[\^~]/g, "")}`);
+    if (combinedDeps["jsonwebtoken"] || combinedDeps["bcryptjs"]) techStackSet.add("JWT Authentication + Bcrypt Security");
 
-    // Utilities & Integrations
-    if (deps["stripe"]) techStackSet.add("Stripe Payments API");
-    if (deps["zod"]) techStackSet.add("Zod Schema Validation");
-    if (deps["clsx"] || deps["tailwind-merge"]) techStackSet.add("Tailwind Merge / Clsx");
-
-    // Intelligent fallbacks if empty
     if (techStackSet.size === 0) {
       techStackSet.add(data.language || "TypeScript 5.x");
       techStackSet.add("RESTful Architecture");
@@ -736,7 +789,7 @@ class GitHubRepositoryEngineService {
     // ─── 2. REAL OVERVIEW ───────────────────────────────────────────
     let overview = "";
 
-    // A. Parse README if available
+    // Parse README for introductory overview
     if (data.readmes && data.readmes.length > 0 && data.readmes[0].trim().length > 20) {
       const readmeText = data.readmes[0];
       const cleanLines = readmeText
@@ -752,76 +805,51 @@ class GitHubRepositoryEngineService {
       }
     }
 
-    // B. Check package.json description
-    if (!overview && pkg.description && pkg.description.length > 10) {
-      overview = `${repo} - ${pkg.description}`;
+    if (!overview && data.packageJsons?.[0]?.description) {
+      overview = `${repo} - ${data.packageJsons[0].description}`;
     }
 
-    // C. Check GitHub repository description
     if (!overview && data.description && data.description.length > 10 && !data.description.includes("repository")) {
       overview = `${repo}: ${data.description}`;
     }
 
-    // D. Dynamic synthesis from repo name and tech stack
     if (!overview) {
-      const domainName = repo
-        .replace(/[-_]/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
-      overview = `${domainName} is an enterprise ${techStack.slice(0, 3).join(", ")} application providing automated workflows, structured API contracts, and high-performance domain execution indexed for the Prosis Executive AI Assistant.`;
+      const domainName = repo.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      overview = `${domainName} is a production ${techStack.slice(0, 3).join(", ")} application providing automated workflows, structured API contracts, and high-performance domain execution.`;
     }
 
     // ─── 3. REAL KEY CAPABILITIES ──────────────────────────────────
     const capabilities: string[] = [];
 
-    // From README features section
-    if (data.readmes && data.readmes.length > 0) {
-      const readme = data.readmes[0];
-      const featureMatch = readme.match(/##?\s*(?:Features|Capabilities|Key Features|What it does)([\s\S]*?)(?:##|$)/i);
+    // Parse README features section
+    for (const readme of data.readmes || []) {
+      const featureMatch = readme.match(/##?\s*(?:Features|Key Features|Capabilities|What it does)([\s\S]*?)(?:##\s+[A-Z]|$)/i);
       if (featureMatch && featureMatch[1]) {
         const bullets = featureMatch[1]
           .split("\n")
           .map((b) => b.trim())
-          .filter((b) => b.startsWith("-") || b.startsWith("*") || /^\d+\./.test(b))
-          .map((b) => b.replace(/^[-*\d.]+\s*/, "").replace(/[*_`]/g, "").trim())
-          .filter((b) => b.length > 10);
+          .filter((b) => b.startsWith("-") || b.startsWith("*") || /^\d+\./.test(b) || b.startsWith("###"))
+          .map((b) => b.replace(/^(?:[-*\d.]+|###)\s*/, "").replace(/[*_`]/g, "").trim())
+          .filter((b) => b.length > 15);
 
-        for (const bullet of bullets.slice(0, 5)) {
-          capabilities.push(bullet);
+        for (const bullet of bullets.slice(0, 6)) {
+          if (!capabilities.includes(bullet)) capabilities.push(bullet);
         }
       }
     }
 
-    // From discovered API routes and domain files
-    const allPathsJoined = filePaths.join(" ").toLowerCase();
-
-    if (capabilities.length < 5) {
-      if (allPathsJoined.includes("realtime") || allPathsJoined.includes("voice") || deps["@openai/agents"]) {
-        capabilities.push("Bidirectional Voice & Realtime Multimodal Telemetry Streaming");
-      }
-      if (allPathsJoined.includes("reserv") || allPathsJoined.includes("seatbook") || allPathsJoined.includes("table")) {
-        capabilities.push("Dynamic Floor Seating, Capacity Allocation & Turn-Time Tracking");
-      }
-      if (allPathsJoined.includes("pacing") || allPathsJoined.includes("velocity")) {
-        capabilities.push("Real-Time Kitchen Pacing Velocity Calculation & Threshold Monitoring");
-      }
-      if (allPathsJoined.includes("auth") || allPathsJoined.includes("session") || allPathsJoined.includes("login")) {
-        capabilities.push("Role-Based Access Control & Multi-Tenant Session Security");
-      }
-      if (allPathsJoined.includes("stripe") || allPathsJoined.includes("deposit") || allPathsJoined.includes("payment")) {
-        capabilities.push("Payment Escrow Processing & Dynamic Cancellation Policy Enforcer");
-      }
-      if (allPathsJoined.includes("repositor") || allPathsJoined.includes("knowledge")) {
-        capabilities.push("Codebase Knowledge Parsing & Architectural Blueprint Synthesis");
-      }
-      if (allPathsJoined.includes("orchestrat") || allPathsJoined.includes("tool")) {
-        capabilities.push("Autonomous Tool Execution Gateway with Multi-Level Governance");
-      }
-      if (deps["prisma"] || filePaths.some((p) => p.endsWith(".prisma"))) {
+    if (capabilities.length < 4) {
+      if (combinedDeps["@xyflow/react"]) capabilities.push("Interactive Drag-and-Drop Floor Plan & Dynamic Table Grid Editing");
+      if (combinedDeps["twilio"]) capabilities.push("Automated Two-Way SMS Reservation Confirmations & Alerts");
+      if (combinedDeps["resend"]) capabilities.push("Transactional Email Token Dispatch & Verification");
+      if (combinedDeps["@fullcalendar/react"]) capabilities.push("Interactive Timeline Calendar & Reservation Booking Grid");
+      if (combinedDeps["@openai/agents"]) capabilities.push("Bidirectional Voice & Realtime Multimodal Telemetry Streaming");
+      if (combinedDeps["prisma"] || (data.schemaPrismas && data.schemaPrismas.length > 0)) {
         capabilities.push("Type-Safe Database Modeling & Schema Migrations via Prisma ORM");
       }
       if (capabilities.length === 0) {
         capabilities.push(
-          "Core Domain Service Execution & State Management",
+          "Multi-Tenant Architecture with Strict Resource Boundary Isolation",
           "Automated API Contract Validation & Schema Verification",
           "Executive Telemetry & Diagnostic Health Monitoring"
         );
@@ -831,16 +859,53 @@ class GitHubRepositoryEngineService {
     // ─── 4. REAL API ENDPOINTS ──────────────────────────────────────
     const endpoints: Array<{ method: string; path: string; description: string }> = [];
 
-    // Search route files from fileTree
+    // A. Parse markdown API contract tables from README.md
+    for (const readme of data.readmes || []) {
+      const lines = readme.split("\n");
+      for (const line of lines) {
+        const match = line.match(
+          /\|\s*`?(GET|POST|PUT|PATCH|DELETE)`?\s*\|\s*`?(\/api\/[^\s`|]+)`?\s*\|\s*([^|]+)\|\s*([^|\r\n]+)\|/i
+        );
+        if (match) {
+          const method = match[1].toUpperCase();
+          const p = match[2].trim();
+          const desc = match[4].replace(/[*_`]/g, "").trim();
+          if (!endpoints.some((e) => e.method === method && e.path === p)) {
+            endpoints.push({ method, path: p, description: desc });
+          }
+        }
+      }
+    }
+
+    // B. Parse Express app mount paths (app.use("/api/...", ...)) from app.ts / server.ts
+    for (const file of data.routeContents || []) {
+      if (file.path.includes("app.ts") || file.path.includes("server.ts")) {
+        const appUseRegex = /app\.use\(\s*["'](\/api\/[^"']+)["']\s*,\s*(\w+)\s*\)/g;
+        let m;
+        while ((m = appUseRegex.exec(file.content)) !== null) {
+          const mountPath = m[1];
+          if (!endpoints.some((e) => e.path === mountPath || e.path.startsWith(mountPath + "/"))) {
+            endpoints.push({
+              method: "GET",
+              path: mountPath,
+              description: this.generateEndpointDescription("GET", mountPath, file.path),
+            });
+          }
+        }
+      }
+    }
+
+    // C. Search route files from fileTree (Next.js App Router or Express routes)
     const routeFiles = data.fileTree.filter((f) => {
       const p = f.path.toLowerCase();
       return (
-        (p.includes("api/") || p.includes("routes/") || p.includes("controllers/")) &&
+        (p.includes("api/") || p.includes("routes/") || p.includes("controllers/") || p.endsWith(".routes.ts")) &&
         (p.endsWith(".ts") || p.endsWith(".js"))
       );
     });
 
-    for (const rf of routeFiles.slice(0, 15)) {
+    for (const rf of routeFiles) {
+      if (endpoints.length >= 25) break;
       let urlPath = "";
       if (rf.path.includes("src/app/api")) {
         urlPath = rf.path.replace(/.*src\/app\/api/, "/api").replace(/\/route\.[tj]sx?$/, "");
@@ -849,36 +914,34 @@ class GitHubRepositoryEngineService {
       } else if (rf.path.includes("pages/api")) {
         urlPath = rf.path.replace(/.*pages\/api/, "/api").replace(/\.[tj]sx?$/, "");
       } else if (rf.path.includes("routes/")) {
-        const fileBase = path.basename(rf.path).replace(/\.[tj]sx?$/, "");
-        urlPath = `/api/v1/${repo}/${fileBase}`;
+        const fileBase = path.basename(rf.path).replace(/\.(?:routes|controller)\.[tj]sx?$/, "").replace(/\.[tj]sx?$/, "");
+        urlPath = `/api/${fileBase}`;
       } else {
-        const fileBase = path.basename(rf.path).replace(/\.[tj]sx?$/, "");
+        const fileBase = path.basename(rf.path).replace(/\.(?:routes|controller)\.[tj]sx?$/, "").replace(/\.[tj]sx?$/, "");
         urlPath = `/api/${fileBase}`;
       }
 
-      // Check if we have file content for this route to extract exact methods
       const matchedContent = data.routeContents?.find((rc) => rc.path === rf.path);
       const methods: string[] = [];
 
       if (matchedContent?.content) {
-        if (/export\s+(?:async\s+)?function\s+GET\b/i.test(matchedContent.content) || /router\.get\(/i.test(matchedContent.content)) methods.push("GET");
-        if (/export\s+(?:async\s+)?function\s+POST\b/i.test(matchedContent.content) || /router\.post\(/i.test(matchedContent.content)) methods.push("POST");
-        if (/export\s+(?:async\s+)?function\s+PUT\b/i.test(matchedContent.content) || /router\.put\(/i.test(matchedContent.content)) methods.push("PUT");
-        if (/export\s+(?:async\s+)?function\s+DELETE\b/i.test(matchedContent.content) || /router\.delete\(/i.test(matchedContent.content)) methods.push("DELETE");
-        if (/export\s+(?:async\s+)?function\s+PATCH\b/i.test(matchedContent.content) || /router\.patch\(/i.test(matchedContent.content)) methods.push("PATCH");
+        if (/export\s+(?:async\s+)?function\s+GET\b|router\.get\(/i.test(matchedContent.content)) methods.push("GET");
+        if (/export\s+(?:async\s+)?function\s+POST\b|router\.post\(/i.test(matchedContent.content)) methods.push("POST");
+        if (/export\s+(?:async\s+)?function\s+PUT\b|router\.put\(/i.test(matchedContent.content)) methods.push("PUT");
+        if (/export\s+(?:async\s+)?function\s+DELETE\b|router\.delete\(/i.test(matchedContent.content)) methods.push("DELETE");
+        if (/export\s+(?:async\s+)?function\s+PATCH\b|router\.patch\(/i.test(matchedContent.content)) methods.push("PATCH");
       }
 
-      if (methods.length === 0) {
-        methods.push("GET");
-      }
+      if (methods.length === 0) methods.push("GET");
 
       for (const m of methods) {
-        const desc = this.generateEndpointDescription(m, urlPath, rf.path);
-        endpoints.push({ method: m, path: urlPath, description: desc });
+        if (!endpoints.some((e) => e.method === m && e.path === urlPath)) {
+          const desc = this.generateEndpointDescription(m, urlPath, rf.path);
+          endpoints.push({ method: m, path: urlPath, description: desc });
+        }
       }
     }
 
-    // If no endpoints found in route files, generate domain endpoints based on repo
     if (endpoints.length === 0) {
       endpoints.push(
         { method: "GET", path: `/api/v1/${repo}/status`, description: "System health probe, readiness checks, and version telemetry." },
@@ -901,14 +964,14 @@ class GitHubRepositoryEngineService {
           const fields = body
             .split("\n")
             .map((l) => l.trim())
-            .filter((l) => l.length > 0 && !l.startsWith("//") && !l.startsWith("@@"))
+            .filter((l) => l.length > 0 && !l.startsWith("//") && !l.startsWith("@@") && !l.startsWith("/**") && !l.startsWith("*"))
             .map((l) => l.split(/\s+/)[0])
-            .filter(Boolean);
+            .filter((f) => f && /^[a-zA-Z_]/.test(f));
 
-          if (fields.length > 0) {
+          if (fields.length > 0 && !domainModels.some((m) => m.name === modelName)) {
             domainModels.push({
               name: modelName,
-              fields: fields.slice(0, 10),
+              fields: fields.slice(0, 11),
               description: `Database entity for ${modelName} with ${fields.length} relational attributes.`,
             });
           }
@@ -931,7 +994,7 @@ class GitHubRepositoryEngineService {
             .map((l) => l.split(":")[0].replace(/[?]/g, "").trim())
             .filter((f) => f.length > 0 && !f.startsWith("//"));
 
-          if (fields.length > 0) {
+          if (fields.length > 0 && !domainModels.some((m) => m.name === name)) {
             domainModels.push({
               name,
               fields: fields.slice(0, 8),
@@ -942,7 +1005,6 @@ class GitHubRepositoryEngineService {
       }
     }
 
-    // Fallback domain models if none parsed
     if (domainModels.length === 0) {
       const cleanName = repo.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\s+/g, "");
       domainModels.push(
@@ -964,16 +1026,24 @@ class GitHubRepositoryEngineService {
       "Prosis Executive Intelligence Operating System via Knowledge & Memory Engine",
     ];
 
-    if (deps["stripe"]) integrationPoints.push("Stripe Connect API for payment processing & deposit escrow");
-    if (deps["@openai/agents"] || deps["openai"]) integrationPoints.push("OpenAI Realtime WebRTC & Voice Agents Gateway");
-    if (deps["@google/genai"] || deps["@google/generative-ai"]) integrationPoints.push("Google Gemini Multimodal Live WebSocket Gateway");
-    if (deps["prisma"] || deps["@prisma/client"]) integrationPoints.push("PostgreSQL Database via Prisma ORM Client");
-    if (deps["ioredis"] || deps["redis"]) integrationPoints.push("Redis In-Memory State & Caching Layer");
-    if (deps["three"]) integrationPoints.push("WebGL 3D Rendering Pipeline");
-    if (deps["zod"]) integrationPoints.push("Strict Runtime Schema Validation (Zod)");
+    if (combinedDeps["stripe"]) integrationPoints.push("Stripe Connect API for payment processing & deposit escrow");
+    if (combinedDeps["twilio"]) integrationPoints.push("Twilio SMS Gateway API for automated communications");
+    if (combinedDeps["resend"]) integrationPoints.push("Resend Transactional Email API");
+    if (combinedDeps["@openai/agents"] || combinedDeps["openai"]) integrationPoints.push("OpenAI Realtime WebRTC & Voice Agents Gateway");
+    if (combinedDeps["@google/genai"] || combinedDeps["@google/generative-ai"]) integrationPoints.push("Google Gemini Multimodal Live WebSocket Gateway");
+    if (combinedDeps["prisma"] || combinedDeps["@prisma/client"]) integrationPoints.push("PostgreSQL Database via Prisma ORM Client");
+    if (combinedDeps["ioredis"] || combinedDeps["redis"]) integrationPoints.push("Redis In-Memory State & Caching Layer");
+    if (combinedDeps["@xyflow/react"]) integrationPoints.push("XYFlow / ReactFlow Floor Plan Modeling Engine");
+    if (combinedDeps["@fullcalendar/react"] || combinedDeps["@fullcalendar/core"]) integrationPoints.push("FullCalendar Grid Scheduling Service");
+    if (combinedDeps["three"]) integrationPoints.push("WebGL 3D Rendering Pipeline");
+    if (combinedDeps["zod"]) integrationPoints.push("Strict Runtime Schema Validation (Zod)");
 
     // ─── 7. REAL ARCHITECTURE NOTES ────────────────────────────────
-    const archFramework = deps["next"] ? "Next.js App Router" : deps["express"] ? "Express.js REST Architecture" : "Modular TypeScript System";
+    const archFramework = combinedDeps["next"]
+      ? "Next.js App Router"
+      : combinedDeps["express"]
+      ? "Express.js REST Architecture"
+      : "Modular TypeScript Full-Stack System";
     const archNotes = `${repo} is structured as a ${archFramework} codebase containing ${data.fileTree.length} indexed files, ${endpoints.length} API routes, and ${domainModels.length} domain schemas. Integrated into Prosis OS with real-time semantic indexing, multi-tenant boundaries, and executive voice intelligence.`;
 
     return {
